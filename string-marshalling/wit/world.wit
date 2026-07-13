@@ -1,0 +1,7 @@
+package demos:string-marshalling;
+
+world string-marshalling {
+    import webidl:baseline/web;
+
+    export run: func(min-ms: u32);
+}

@@ -1,0 +1,7 @@
+package demos:hello-world;
+
+world hello-world {
+    import webidl:baseline/web;
+
+    export run: func();
+}

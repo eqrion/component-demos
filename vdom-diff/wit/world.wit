@@ -1,0 +1,7 @@
+package demos:vdom-diff;
+
+world vdom-diff {
+    import webidl:baseline/web;
+
+    export run: func(row-count: u32);
+}

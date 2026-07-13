@@ -1,0 +1,112 @@
+#[allow(warnings)]
+mod bindings;
+
+use bindings::webidl::baseline::web;
+use bindings::webidl::baseline::web::{Document, Element, TrustedTypeOrString};
+use bindings::Guest;
+
+struct Component;
+
+const ATTRS: [&str; 4] = ["data-x", "data-y", "class", "title"];
+
+fn create(document: &Document, tag: &str) -> Element {
+    document.create_element(tag)
+}
+
+fn append_child(parent: &Element, child: &Element) {
+    parent.append_child(&web::element_as_node(child));
+}
+
+fn append_text(document: &Document, parent: &Element, text: &str) {
+    let node = document.create_text_node(text);
+    parent.append_child(&web::text_as_node(&node));
+}
+
+fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_write: &str) {
+    let row = create(document, "tr");
+    for value in [label, ms, ns_per_write] {
+        let td = create(document, "td");
+        append_text(document, &td, value);
+        append_child(&row, &td);
+    }
+    append_child(table, &row);
+}
+
+fn build_elements(document: &Document, count: u32) -> Vec<Element> {
+    (0..count).map(|_| create(document, "div")).collect()
+}
+
+impl Guest for Component {
+    fn run(elements: u32, frames: u32) {
+        let document = web::get_window().document();
+        let elements_n = elements.max(1);
+        let frames_n = frames.max(1);
+        let total_writes = elements_n as f64 * frames_n as f64 * ATTRS.len() as f64;
+
+        // Same fixed workload run two ways: one `set-attribute` host call per
+        // attribute, versus one `set-attributes` host call per element that
+        // carries all of its attributes at once. Both write identical values;
+        // only the number of boundary crossings differs.
+        let individual = build_elements(&document, elements_n);
+        let individual_start = web::now();
+        for frame in 0..frames_n {
+            for el in &individual {
+                for (i, name) in ATTRS.iter().enumerate() {
+                    el.set_attribute(name, TrustedTypeOrString::String(format!("{frame}-{i}")));
+                }
+            }
+        }
+        let individual_ms = web::now() - individual_start;
+
+        let batched = build_elements(&document, elements_n);
+        let batched_start = web::now();
+        for frame in 0..frames_n {
+            for el in &batched {
+                let pairs: Vec<(String, String)> = ATTRS
+                    .iter()
+                    .enumerate()
+                    .map(|(i, name)| (name.to_string(), format!("{frame}-{i}")))
+                    .collect();
+                el.set_attributes(&pairs);
+            }
+        }
+        let batched_ms = web::now() - batched_start;
+
+        let individual_ns = individual_ms * 1_000_000.0 / total_writes;
+        let batched_ns = batched_ms * 1_000_000.0 / total_writes;
+
+        let heading = create(&document, "h2");
+        append_text(&document, &heading, "Rust component (wasm)");
+
+        let table = create(&document, "table");
+        let header = create(&document, "tr");
+        for label in ["approach", "total ms", "ns/write"] {
+            let th = create(&document, "th");
+            append_text(&document, &th, label);
+            append_child(&header, &th);
+        }
+        append_child(&table, &header);
+
+        append_row(
+            &document,
+            &table,
+            "individual (1 call/attribute)",
+            &format!("{individual_ms:.2}"),
+            &format!("{individual_ns:.1}"),
+        );
+        append_row(
+            &document,
+            &table,
+            "batched (1 call/element)",
+            &format!("{batched_ms:.2}"),
+            &format!("{batched_ns:.1}"),
+        );
+
+        if let Some(body) = document.body() {
+            body.append_child(&web::element_as_node(&heading));
+            body.append_child(&web::element_as_node(&table));
+        }
+    }
+}
+
+bindings::export!(Component with_types_in bindings);

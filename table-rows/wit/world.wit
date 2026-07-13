@@ -1,0 +1,7 @@
+package demos:table-rows;
+
+world table-rows {
+    import webidl:baseline/web;
+
+    export run: func(row-count: u32);
+}

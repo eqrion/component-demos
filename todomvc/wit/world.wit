@@ -1,0 +1,7 @@
+package demos:todomvc;
+
+world todomvc {
+    import webidl:baseline/web;
+
+    export run: func();
+}

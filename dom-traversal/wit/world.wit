@@ -1,0 +1,7 @@
+package demos:dom-traversal;
+
+world dom-traversal {
+    import webidl:baseline/web;
+
+    export run: func(node-count: u32, iterations: u32);
+}

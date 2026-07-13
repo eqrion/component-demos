@@ -1,0 +1,7 @@
+package demos:canvas-draw;
+
+world canvas-draw {
+    import webidl:baseline/web;
+
+    export run: func(rects: u32);
+}

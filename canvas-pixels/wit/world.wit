@@ -1,0 +1,7 @@
+package demos:canvas-pixels;
+
+world canvas-pixels {
+    import webidl:baseline/web;
+
+    export run: func(size: u32, min-ms: u32);
+}

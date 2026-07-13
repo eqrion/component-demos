@@ -1,0 +1,7 @@
+package demos:attribute-churn;
+
+world attribute-churn {
+    import webidl:baseline/web;
+
+    export run: func(elements: u32, frames: u32);
+}
