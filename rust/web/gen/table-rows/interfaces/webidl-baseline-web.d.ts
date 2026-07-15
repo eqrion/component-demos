@@ -1,0 +1,55 @@
+/** @module Interface webidl:baseline/web **/
+export function elementAsNode(v: Element): Node;
+export function getWindow(): Window;
+export function now(): number;
+export function textAsNode(v: Text): Node;
+
+export class Document {
+  /**
+   * This type does not have a public constructor.
+   */
+  private constructor();
+  body(): HtmlElement | undefined;
+  createElement(localName: string): Element;
+  createTextNode(data: string): Text;
+}
+
+export class Element {
+  /**
+   * This type does not have a public constructor.
+   */
+  private constructor();
+  appendChild(node: Node): Node;
+  remove(): void;
+}
+
+export class HtmlElement {
+  /**
+   * This type does not have a public constructor.
+   */
+  private constructor();
+  appendChild(node: Node): Node;
+}
+
+export class Node {
+  /**
+   * This type does not have a public constructor.
+   */
+  private constructor();
+  setTextContent(value: string): void;
+}
+
+export class Text {
+  /**
+   * This type does not have a public constructor.
+   */
+  private constructor();
+}
+
+export class Window {
+  /**
+   * This type does not have a public constructor.
+   */
+  private constructor();
+  document(): Document;
+}
