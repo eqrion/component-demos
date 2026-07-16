@@ -1,0 +1,14 @@
+[workspace]
+resolver = "3"
+members = [
+    "attribute-churn",
+    "canvas-draw",
+    "canvas-pixels",
+    "dom-query",
+    "dom-traversal",
+    "hello-world",
+    "string-marshalling",
+    "table-rows",
+    "todomvc",
+    "vdom-diff",
+]

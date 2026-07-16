@@ -1,8 +1,8 @@
 #[allow(warnings)]
 mod bindings;
 
-use bindings::Guest;
 use bindings::webidl::baseline::web;
+use bindings::Guest;
 
 struct Component;
 

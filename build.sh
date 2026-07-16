@@ -36,7 +36,7 @@ fi
 build_wasm() {
     echo "======== BUILDING ========"
     for demo in "${demos[@]}"; do
-        (cd "$demo" && cargo component build)
+        (cd "rust/$demo" && cargo component build)
     done
 }
 
@@ -58,7 +58,7 @@ transpile() {
     fi
     for demo in "${demos[@]}"; do
         wasm="${demo//-/_}"
-        ./node_modules/.bin/jco transpile "../$demo/target/wasm32-wasip1/debug/$wasm.wasm" \
+        ./node_modules/.bin/jco transpile "../rust/$demo/target/wasm32-wasip1/debug/$wasm.wasm" \
             --map webidl:baseline/web=../../host/web-host.js -o "gen/$demo"
         for wasm_file in "gen/$demo"/*.wasm; do
             wasm-tools print "$wasm_file" -o "${wasm_file%.wasm}.wat"

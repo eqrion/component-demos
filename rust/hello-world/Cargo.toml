@@ -17,6 +17,6 @@ world = "hello-world"
 path = "wit"
 
 [package.metadata.component.target.dependencies]
-"webidl:baseline" = { path = "../web.wit" }
+"webidl:baseline" = { path = "../../web.wit" }
 
 [package.metadata.component.dependencies]
