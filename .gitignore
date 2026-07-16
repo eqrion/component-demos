@@ -1,5 +1,12 @@
 target/
 node_modules/
-web/gen/
 web/dist/
+web/*/*/jco/
+web/*/*/native/
 **/src/bindings.rs
+
+# C / raw-toolchain intermediates
+build/
+**/bindings/
+# WASI SDK sysroot, installed on demand via install_wasi_sdk.sh
+_sysroot/
