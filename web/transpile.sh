@@ -16,9 +16,6 @@ outdir="$2"
     -o "$outdir"
 
 # Emit a .wat next to each core wasm as a debugging aid (needs wasm-tools).
-# jco inlines small core modules as base64 straight into the JS, so some
-# components produce no separate .core.wasm at all — nullglob skips the loop
-# cleanly in that case instead of passing a literal "*.wasm" to wasm-tools.
 shopt -s nullglob
 for w in "$outdir"/*.wasm; do
     wasm-tools print "$w" -o "${w%.wasm}.wat"

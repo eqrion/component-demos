@@ -5,8 +5,9 @@ cd "$(dirname "$0")"
 webdir="c/calculator"
 
 mkdir -p build
-# Compile and link separately so we can optimize without binaryen, which is on
-# by default and chokes on components.
+# We build and link separately so we can compile with optimizations without
+# invoking binaryen (which is annoyingly activated by default and chokes on
+# components).
 clang -c -O1 -target wasm32-wasip2 calculator.c -o build/calculator.o
 clang -nostdlib -target wasm32-wasip2 \
   -Wl,--no-entry -Wl,--export-all \

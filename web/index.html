@@ -1,37 +1,52 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <title>WASM Component Model demos</title>
 </head>
+
 <body>
   <h1>WASM Component Model demos</h1>
-  <p>WebAssembly components built from various languages and toolchains, transpiled to the browser with jco.</p>
+  <p>WebAssembly components built from various languages and toolchains.</p>
 
-  <h2>Rust &mdash; Web API demos (cargo component)</h2>
-  <p>Components importing the whole Web API as a WIT interface, driving the real DOM.</p>
+  <h2>Rust</h2>
+  <h3>cargo component (wasip1 -> wasip2 adapter)</h3>
   <ul>
     <li><a href="./rust/hello-world/">Hello, world</a></li>
     <li><a href="./rust/todomvc/">TodoMVC (static)</a></li>
-    <li><a href="./rust/dom-traversal/">DOM traversal (microbenchmark)</a></li>
-    <li><a href="./rust/string-marshalling/">String marshalling (microbenchmark)</a></li>
-    <li><a href="./rust/attribute-churn/">Attribute churn (microbenchmark)</a></li>
-    <li><a href="./rust/dom-query/">DOM query (microbenchmark)</a></li>
-    <li><a href="./rust/table-rows/">Table rows (composite benchmark)</a></li>
-    <li><a href="./rust/canvas-draw/">Canvas draw (microbenchmark)</a></li>
-    <li><a href="./rust/canvas-pixels/">Canvas pixel transfer (microbenchmark)</a></li>
-    <li><a href="./rust/vdom-diff/">Keyed-list vdom diff (composite benchmark)</a></li>
+    <li><a href="./rust/dom-traversal/">DOM traversal</a></li>
+    <li><a href="./rust/string-marshalling/">String marshalling</a></li>
+    <li><a href="./rust/attribute-churn/">Attribute churn</a></li>
+    <li><a href="./rust/dom-query/">DOM query</a></li>
+    <li><a href="./rust/table-rows/">Table rows</a></li>
+    <li><a href="./rust/canvas-draw/">Canvas draw</a></li>
+    <li><a href="./rust/canvas-pixels/">Canvas pixel transfer</a></li>
+    <li><a href="./rust/vdom-diff/">Keyed-list vdom diff</a></li>
+  </ul>
+  <h3>wit-bindgen + wasip2</h3>
+  <ul>
+    <li><a href="./rust/calculator/">Calculator</a></li>
+  </ul>
+  <h3>wasip2 (no WIT)</h3>
+  <ul>
+    <li><a href="./rust/calculator-raw/">Calculator</a></li>
   </ul>
 
-  <h2>Compute demos &mdash; same components, different toolchains</h2>
-  <p>Tiny <code>calculator</code> (<code>add</code>/<code>sub</code>) and <code>greet</code> components built several ways, to exercise transpiling output from non-Rust and non-<code>cargo&nbsp;component</code> build paths.</p>
+  <h2>C</h2>
+  <h3>Freestanding (no libc)</h3>
   <ul>
-    <li><a href="./rust/calculator/">Calculator &mdash; Rust, wit-bindgen (native wasip2)</a></li>
-    <li><a href="./rust/calculator-raw/">Calculator &mdash; Rust, raw rustc</a></li>
-    <li><a href="./c/calculator/">Calculator &mdash; C, freestanding</a></li>
-    <li><a href="./c/greet-freestanding/">Greet &mdash; C, freestanding</a></li>
-    <li><a href="./c/greet-libc/">Greet &mdash; C, wasi-libc</a></li>
-    <li><a href="./c/greet-bindgen/">Greet &mdash; C, wit-bindgen</a></li>
+    <li><a href="./c/calculator/">Calculator</a></li>
+    <li><a href="./c/greet-freestanding/">Greet</a></li>
+  </ul>
+  <h3>libc, no bindings</h3>
+  <ul>
+    <li><a href="./c/greet-libc/">Greet (libc)</a></li>
+  </ul>
+  <h3>wit-bindgen + wasip2</h3>
+  <ul>
+    <li><a href="./c/greet-bindgen/">Greet</a></li>
   </ul>
 </body>
+
 </html>
