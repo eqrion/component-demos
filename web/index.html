@@ -6,7 +6,10 @@
 </head>
 <body>
   <h1>WASM Component Model demos</h1>
-  <p>Rust components importing the whole Web API as a WIT interface, transpiled to the browser with jco.</p>
+  <p>WebAssembly components built from various languages and toolchains, transpiled to the browser with jco.</p>
+
+  <h2>Rust &mdash; Web API demos (cargo component)</h2>
+  <p>Components importing the whole Web API as a WIT interface, driving the real DOM.</p>
   <ul>
     <li><a href="./rust/hello-world/">Hello, world</a></li>
     <li><a href="./rust/todomvc/">TodoMVC (static)</a></li>
@@ -18,6 +21,17 @@
     <li><a href="./rust/canvas-draw/">Canvas draw (microbenchmark)</a></li>
     <li><a href="./rust/canvas-pixels/">Canvas pixel transfer (microbenchmark)</a></li>
     <li><a href="./rust/vdom-diff/">Keyed-list vdom diff (composite benchmark)</a></li>
+  </ul>
+
+  <h2>Compute demos &mdash; same components, different toolchains</h2>
+  <p>Tiny <code>calculator</code> (<code>add</code>/<code>sub</code>) and <code>greet</code> components built several ways, to exercise transpiling output from non-Rust and non-<code>cargo&nbsp;component</code> build paths.</p>
+  <ul>
+    <li><a href="./rust/calculator/">Calculator &mdash; Rust, wit-bindgen (native wasip2)</a></li>
+    <li><a href="./rust/calculator-raw/">Calculator &mdash; Rust, raw rustc</a></li>
+    <li><a href="./c/calculator/">Calculator &mdash; C, freestanding</a></li>
+    <li><a href="./c/greet-freestanding/">Greet &mdash; C, freestanding</a></li>
+    <li><a href="./c/greet-libc/">Greet &mdash; C, wasi-libc</a></li>
+    <li><a href="./c/greet-bindgen/">Greet &mdash; C, wit-bindgen</a></li>
   </ul>
 </body>
 </html>

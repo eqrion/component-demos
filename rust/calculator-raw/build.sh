@@ -2,12 +2,11 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-wasm="vdom_diff"
-webdir="rust/vdom-diff"
+webdir="rust/calculator-raw"
 
-cargo component build
+cargo build --release
 
-component="$PWD/target/wasm32-wasip1/debug/$wasm.wasm"
+component="$PWD/target/wasm32-wasip2/release/calculator.wasm"
 ../../web/transpile.sh "$component" "$webdir/jco"
 mkdir -p "../../web/$webdir/native"
 cp "$component" "../../web/$webdir/native/"

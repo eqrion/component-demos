@@ -1,27 +1,38 @@
 # component-demos
 
-WebAssembly Component Model demos: components that import the Web API as a
-[WIT](https://component-model.bytecodealliance.org/design/wit.html) interface
-and run in the browser. Today the guests are Rust (built with `cargo
-component`) and they run via [`jco`](https://github.com/bytecodealliance/jco)
-transpilation, but the repo is arranged so that other languages and other
-runtimes — in particular **native** component execution in the browser — can be
-added alongside.
+WebAssembly Component Model demos: components built from a variety of languages
+and toolchains that run in the browser via
+[`jco`](https://github.com/bytecodealliance/jco) transpilation. The repo is
+arranged so that many languages and build methodologies — and eventually
+**native** component execution in the browser — coexist without the top-level
+build making any assumptions about how a given demo is built.
+
+Demos come in two flavors:
+
+- **Web API demos** (Rust, `cargo component`) import the Web API as a
+  [WIT](https://component-model.bytecodealliance.org/design/wit.html) interface
+  and export a single `run()` that does its DOM work synchronously at call time
+  (no event listeners — the component model doesn't support callbacks into a
+  component yet).
+- **Compute demos** (`calculator`: `add`/`sub`; `greet`: `greet(name)`) are tiny
+  components with no DOM imports, built several different ways (Rust via
+  wit-bindgen, Rust via raw `rustc`, C freestanding, C with wasi-libc, C via
+  wit-bindgen). They exist to exercise transpiling output from heterogeneous
+  build paths.
 
 ## Pipeline
 
 ```
-Rust guest (imports web.wit)
-  --cargo component build-->  .wasm component
-  --jco transpile------------> JS + core wasm  (webidl:baseline/web mapped to web/host/web-host.js)   [jco path]
-  --(copied verbatim)--------> raw .wasm                                                               [native path, TBD]
-  --vite---------------------> served to the browser
+guest source (Rust / C / ...)
+  --<the demo's own build.sh>-->  .wasm component
+  --jco transpile-------------->  JS + core wasm  (webidl:baseline/web mapped to web/host/web-host.js)  [jco path]
+  --(copied verbatim)---------->  raw .wasm                                                             [native path, TBD]
+  --vite---------------------->   served to the browser
 ```
 
-Each demo is a component that imports the `web` interface and exports a single
-`run()` function. `run()` does all its DOM work (create elements, set
-attributes, append children) synchronously at call time — no event listeners;
-the component model doesn't support callbacks into a component yet.
+How the `.wasm` component gets built is entirely up to each demo's `build.sh`
+(cargo component, plain `cargo build`, `clang`, a raw `rustc` invocation, …);
+everything downstream of the component is uniform.
 
 The same built component can be consumed two ways, and the repo keeps room for
 both per example:
@@ -44,13 +55,22 @@ assumptions about how anything is built.
 
 ```
 build.sh                     # discovers */*/build.sh, runs each, then serves vite
-web.wit                      # curated WIT interface every demo imports
+install_wasi_sdk.sh          # fetches the wasi-sdk sysroot into _sysroot/ (for the C demos)
+web.wit                      # curated WIT interface the Web API demos import
 web-full.wit                 # full generated interface, for reference (unused)
-rust/                        # a language
-  Cargo.toml                 # Cargo workspace over the example crates
+rust/                        # a language bucket (no Cargo workspace — each crate is standalone)
+  hello-world/ todomvc/ ...  # Web API demos (cargo component)
+  calculator/                # compute demo, wit-bindgen + plain cargo build (native wasip2)
+  calculator-raw/            # compute demo, raw #[no_mangle] + rustc --component-type
   <example>/
-    build.sh                 # compile -> jco transpile -> stage native
-    Cargo.toml src/lib.rs wit/world.wit
+    build.sh                 # build the component -> jco transpile -> stage native
+c/                           # another language bucket
+  calculator/                # freestanding clang, --export-all
+  greet-freestanding/        # bump allocator, no libc
+  greet-libc/                # wasi-sdk sysroot (malloc/free), reactor
+  greet-bindgen/             # wit-bindgen-generated C bindings + sysroot
+  <example>/
+    build.sh  <name>.c  <name>.wit
 web/
   build.sh -> (n/a)          # web has no build.sh; it's the host, not an example
   transpile.sh               # shared, mechanical jco step (the "polyfill")
@@ -73,7 +93,11 @@ web/
   is mechanical: a pure function of the built component and the shared host
   glue, identical for every example (`--map webidl:baseline/web=…/web-host.js`).
   Every example's `build.sh` calls it rather than duplicating the invocation.
-- **`web.wit`** — the curated WIT interface the demos actually import: just the
+- **`install_wasi_sdk.sh`** — downloads the latest wasi-sdk sysroot into
+  `_sysroot/` (gitignored) and installs the wasm32 compiler-rt builtins clang
+  needs. Required for the C demos that use libc (`c/greet-libc`,
+  `c/greet-bindgen`); the freestanding C demos need neither.
+- **`web.wit`** — the curated WIT interface the Web API demos import: just the
   resources/functions the ten demos call (`window`, `document`, `element`,
   `node`, `text`, `dom-token-list`, `canvas-rendering-context2d`, plus the
   `element-as-node`/`text-as-node` casts and a `now` clock). This is what's
@@ -85,7 +109,7 @@ web/
   the real DOM (see "Why hand-written host glue?" below). Wired in at transpile
   time via `jco transpile --map`.
 
-### The examples (under `rust/`)
+### Web API demos (under `rust/`)
 
 - **`hello-world/`** — creates an `<h1>`, sets a class, appends a text node, and
   inserts it into `document.body`.
@@ -137,23 +161,42 @@ web/
   the real DOM. Reports inserts/removes/moves/updates plus total time. `?rows=`
   controls the row count.
 
+### Compute demos (under `rust/` and `c/`)
+
+The same two trivial components, each built a different way — the point is to
+show heterogeneous build paths all feeding the same jco/native pipeline. Their
+web pages are tiny interactive forms (numbers for `calculator`, a name for
+`greet`) that call the transpiled export directly.
+
+- **`rust/calculator/`** — Rust, wit-bindgen `generate!` macro + plain
+  `cargo build` targeting `wasm32-wasip2`.
+- **`rust/calculator-raw/`** — Rust, raw `#[no_mangle]` exports with a
+  `--component-type` linker arg — no bindings generator.
+- **`c/calculator/`** — C, `clang -nostdlib --export-all`, no libc.
+- **`c/greet-freestanding/`** — C, hand-rolled bump allocator, no libc/sysroot.
+- **`c/greet-libc/`** — C, wasi-sdk sysroot (`malloc`/`free`), reactor model.
+- **`c/greet-bindgen/`** — C, wit-bindgen-generated bindings + wasi-sdk sysroot.
+
 ## Usage
 
-Requires `cargo`, [`cargo component`](https://github.com/bytecodealliance/cargo-component),
-`wasm-tools`, and Node.js. From the repo root:
+Requires `cargo` + [`cargo component`](https://github.com/bytecodealliance/cargo-component)
+(Rust demos), a real upstream `clang`/LLVM with wasm32 support (C demos — Apple
+clang won't work; use e.g. Homebrew `llvm`), `wit-bindgen` and `wasm-tools`, and
+Node.js. For the libc-based C demos, first run `./install_wasi_sdk.sh` once to
+populate `_sysroot/`. From the repo root:
 
 ```
-./build.sh            # build every example (compile + jco transpile + stage native)
+./build.sh            # build every demo (compile + jco transpile + stage native)
 ./build.sh --dev      # ... then start the Vite dev server
 ./build.sh --build    # ... then produce a production build in web/dist
 ./build.sh --preview  # ... then produce a production build and preview it
 ```
 
-`build.sh` always rebuilds from source first, so it stays correct after editing
-a crate's `src/lib.rs` or `web.wit` itself. To rebuild a single example without
-the others, run its own script directly, e.g. `rust/hello-world/build.sh` (this
-assumes `web/node_modules` is already installed, since it uses the shared jco
-there).
+`build.sh` discovers every `*/*/build.sh` and runs it, then serves vite; it
+makes no assumptions about how any demo builds. It always rebuilds from source
+first. To rebuild a single demo without the others, run its own script
+directly, e.g. `rust/hello-world/build.sh` (this assumes `web/node_modules` is
+already installed, since it uses the shared jco there).
 
 ## Why a curated subset?
 
