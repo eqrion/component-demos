@@ -1,5 +1,6 @@
 target/
 node_modules/
-web/gen/
 web/dist/
+web/*/*/jco/
+web/*/*/native/
 **/src/bindings.rs

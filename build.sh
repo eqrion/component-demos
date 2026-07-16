@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#   ./build.sh            build + transpile in web/gen
+#   ./build.sh            build every example (each example's own build.sh)
 #   ./build.sh --dev      ... then start the Vite dev server
 #   ./build.sh --build    ... then produce a production build in web/dist
 #   ./build.sh --preview  ... then produce a production build and preview it
@@ -7,20 +7,6 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-demos=(
-    hello-world
-    todomvc
-    dom-traversal
-    string-marshalling
-    attribute-churn
-    dom-query
-    table-rows
-    canvas-draw
-    canvas-pixels
-    vdom-diff
-)
-
-# Parse the (single) optional flag.
 flag=""
 if [[ $# -gt 0 ]]; then
     case "$1" in
@@ -32,43 +18,28 @@ if [[ $# -gt 0 ]]; then
     esac
 fi
 
-# Build both demo components to core wasm + adapt into components.
-build_wasm() {
-    echo "======== BUILDING ========"
-    for demo in "${demos[@]}"; do
-        (cd "rust/$demo" && cargo component build)
-    done
-}
-
-# Transpile the built components into web/gen/, wiring the `webidl:baseline/web`
-# import to the hand-written host glue in web/host/web-host.js (see that file
-# and ~/src/webidl-index/canonwit/JCO_COMPAT.md for why we don't use jco's
-# zero-config WebIDL binding here).
-transpile() {
-    echo "======== TRANSPILING ========"
-    cd web
-    if [[ ! -d node_modules ]]; then
-        printf 'web/node_modules is missing. Run "npm install"? [y/N] '
-        read -r reply
-        if [[ "$reply" == [Yy] || "$reply" == [Yy][Ee][Ss] ]]; then
-            npm install
-        else
-            exit 1
-        fi
+# The web app supplies the shared tooling that example builds lean on (jco, from
+# web/node_modules, via web/transpile.sh) and hosts their output, so make sure
+# its deps are installed before dispatching to the per-example builds.
+if [[ ! -d web/node_modules ]]; then
+    printf 'web/node_modules is missing. Run "npm install"? [y/N] '
+    read -r reply
+    if [[ "$reply" == [Yy] || "$reply" == [Yy][Ee][Ss] ]]; then
+        (cd web && npm install)
+    else
+        exit 1
     fi
-    for demo in "${demos[@]}"; do
-        wasm="${demo//-/_}"
-        ./node_modules/.bin/jco transpile "../rust/$demo/target/wasm32-wasip1/debug/$wasm.wasm" \
-            --map webidl:baseline/web=../../host/web-host.js -o "gen/$demo"
-        for wasm_file in "gen/$demo"/*.wasm; do
-            wasm-tools print "$wasm_file" -o "${wasm_file%.wasm}.wat"
-        done
-    done
-    cd ..
-}
+fi
 
-build_wasm
-transpile
+# Discover and run every example's build. `*/*/build.sh` = <language>/<example>;
+# the web/ tree has no matching build.sh, so it is skipped naturally.
+echo "======== BUILDING EXAMPLES ========"
+shopt -s nullglob
+for script in */*/build.sh; do
+    echo "-------- $script --------"
+    (cd "$(dirname "$script")" && ./build.sh)
+done
+shopt -u nullglob
 
 case "$flag" in
     --dev)
