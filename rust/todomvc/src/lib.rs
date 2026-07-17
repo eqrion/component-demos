@@ -74,7 +74,11 @@ fn append_child(parent: &Element, child: &Element) {
     parent.append_child(&element_as_node(child));
 }
 
-fn append_text(document: &Document, parent: &Element, text: &str) {
+fn set_text(element: &Element, text: &str) {
+    element.set_text_content(text);
+}
+
+fn append_text_node(document: &Document, parent: &Element, text: &str) {
     let node = document.create_text_node(text);
     parent.append_child(&text_as_node(&node));
 }
@@ -98,7 +102,7 @@ fn build_todo_item(document: &Document, todo: &Todo) -> Element {
     append_child(&view, &toggle);
 
     let label = create(document, "label");
-    append_text(document, &label, todo.title);
+    set_text(&label, todo.title);
     append_child(&view, &label);
 
     let destroy = create(document, "button");
@@ -115,7 +119,7 @@ fn build_filter(document: &Document, label: &str, href: &str, selected: bool) ->
     if selected {
         set_class(&link, "selected");
     }
-    append_text(document, &link, label);
+    set_text(&link, label);
     append_child(&li, &link);
     li
 }
@@ -132,7 +136,7 @@ impl Guest for Component {
         append_child(&root, &header);
 
         let h1 = create(&document, "h1");
-        append_text(&document, &h1, "todos");
+        set_text(&h1, "todos");
         append_child(&header, &h1);
 
         let new_todo = create(&document, "input");
@@ -153,7 +157,7 @@ impl Guest for Component {
 
         let toggle_all_label = create(&document, "label");
         set_attr(&toggle_all_label, "for", "toggle-all");
-        append_text(&document, &toggle_all_label, "Mark all as complete");
+        set_text(&toggle_all_label, "Mark all as complete");
         append_child(&main, &toggle_all_label);
 
         let todo_list = create(&document, "ul");
@@ -172,9 +176,9 @@ impl Guest for Component {
         let count = create(&document, "span");
         set_class(&count, "todo-count");
         let strong = create(&document, "strong");
-        append_text(&document, &strong, &remaining.to_string());
+        set_text(&strong, &remaining.to_string());
         append_child(&count, &strong);
-        append_text(&document, &count, if remaining == 1 { " item left" } else { " items left" });
+        append_text_node(&document, &count, if remaining == 1 { " item left" } else { " items left" });
         append_child(&footer, &count);
 
         let filters = create(&document, "ul");
@@ -186,7 +190,7 @@ impl Guest for Component {
 
         let clear_completed = create(&document, "button");
         set_class(&clear_completed, "clear-completed");
-        append_text(&document, &clear_completed, "Clear completed");
+        set_text(&clear_completed, "Clear completed");
         append_child(&footer, &clear_completed);
 
         if let Some(body) = document.body() {

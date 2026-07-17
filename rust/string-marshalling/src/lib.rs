@@ -60,16 +60,11 @@ fn append_child(parent: &Element, child: &Element) {
     parent.append_child(&element_as_node(child));
 }
 
-fn append_text(document: &Document, parent: &Element, text: &str) {
-    let node = document.create_text_node(text);
-    parent.append_child(&text_as_node(&node));
-}
-
 fn append_row(document: &Document, table: &Element, cell_tag: &str, cells: &[String]) {
     let row = create(document, "tr");
     for cell in cells {
         let td = create(document, cell_tag);
-        append_text(document, &td, cell);
+        td.set_text_content(cell);
         append_child(&row, &td);
     }
     append_child(table, &row);
@@ -95,11 +90,10 @@ impl Guest for Component {
     fn run(min_ms: u32) {
         let document = get_window().document();
         let el = create(&document, "div");
-        let node = element_as_node(&el);
         let min_ms = min_ms.max(1) as f64;
 
         let heading = create(&document, "h2");
-        append_text(&document, &heading, "Rust component (wasm)");
+        heading.set_text_content("Rust component (wasm)");
 
         let table = create(&document, "table");
         append_row(
@@ -117,17 +111,17 @@ impl Guest for Component {
 
         for &size in SIZES.iter() {
             let value = "x".repeat(size);
-            node.set_text_content(&value);
-            debug_assert_eq!(node.text_content().len(), size);
+            el.set_text_content(&value);
+            debug_assert_eq!(el.text_content().len(), size);
 
             let (set_reps, set_ms) = measure(min_ms, |reps| {
                 for _ in 0..reps {
-                    node.set_text_content(&value);
+                    el.set_text_content(&value);
                 }
             });
             let (get_reps, get_ms) = measure(min_ms, |reps| {
                 for _ in 0..reps {
-                    let _ = node.text_content();
+                    let _ = el.text_content();
                 }
             });
 

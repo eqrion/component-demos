@@ -57,16 +57,11 @@ fn append_child(parent: &Element, child: &Element) {
     parent.append_child(&element_as_node(child));
 }
 
-fn append_text(document: &Document, parent: &Element, text: &str) {
-    let node = document.create_text_node(text);
-    parent.append_child(&text_as_node(&node));
-}
-
 fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_row: &str) {
     let row = create(document, "tr");
     for value in [label, ms, ns_per_row] {
         let td = create(document, "td");
-        append_text(document, &td, value);
+        td.set_text_content(value);
         append_child(&row, &td);
     }
     append_child(table, &row);
@@ -96,7 +91,7 @@ impl Guest for Component {
         for i in 0..count {
             let tr = create(&document, "tr");
             let td = create(&document, "td");
-            append_text(&document, &td, &format!("row {i}"));
+            td.set_text_content(&format!("row {i}"));
             append_child(&tr, &td);
             append_child(&tbody, &tr);
             rows.push((tr, td));
@@ -107,7 +102,7 @@ impl Guest for Component {
         let mut updated: u32 = 0;
         for (i, (_, td)) in rows.iter().enumerate() {
             if i % 10 == 0 {
-                element_as_node(td).set_text_content(&format!("row {i} !!!"));
+                td.set_text_content(&format!("row {i} !!!"));
                 updated += 1;
             }
         }
@@ -120,13 +115,13 @@ impl Guest for Component {
         let clear_ms = now() - clear_start;
 
         let heading = create(&document, "h2");
-        append_text(&document, &heading, "Rust component (wasm)");
+        heading.set_text_content("Rust component (wasm)");
 
         let report = create(&document, "table");
         let header = create(&document, "tr");
         for label in ["phase", "total ms", "ns/row"] {
             let th = create(&document, "th");
-            append_text(&document, &th, label);
+            th.set_text_content(label);
             append_child(&header, &th);
         }
         append_child(&report, &header);

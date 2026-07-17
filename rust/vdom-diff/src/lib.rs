@@ -88,18 +88,13 @@ fn insert_before(parent: &Element, child: &Element, reference: &Element) {
     parent.insert_before(&element_as_node(child), &element_as_node(reference));
 }
 
-fn append_text(document: &Document, parent: &Element, text: &str) {
-    let node = document.create_text_node(text);
-    parent.append_child(&text_as_node(&node));
-}
-
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
     let row = create(document, "tr");
     let th = create(document, "th");
-    append_text(document, &th, label);
+    th.set_text_content(label);
     append_child(&row, &th);
     let td = create(document, "td");
-    append_text(document, &td, value);
+    td.set_text_content(value);
     append_child(&row, &td);
     append_child(table, &row);
 }
@@ -182,7 +177,7 @@ impl Guest for Component {
             .map(|key| {
                 let element = create(&document, "li");
                 let label = format!("row {key}");
-                element_as_node(&element).set_text_content(&label);
+                element.set_text_content(&label);
                 append_child(&container, &element);
                 Row { key, label, element }
             })
@@ -221,7 +216,7 @@ impl Guest for Component {
                 Some(&old_i) => {
                     let mut row = old_rows[old_i].take().unwrap();
                     if row.label != label {
-                        element_as_node(&row.element).set_text_content(&label);
+                        row.element.set_text_content(&label);
                         row.label = label;
                         updates += 1;
                     }
@@ -229,7 +224,7 @@ impl Guest for Component {
                 }
                 None => {
                     let element = create(&document, "li");
-                    element_as_node(&element).set_text_content(&label);
+                    element.set_text_content(&label);
                     inserts += 1;
                     Row { key, label, element }
                 }
@@ -273,7 +268,7 @@ impl Guest for Component {
         };
 
         let heading = create(&document, "h2");
-        append_text(&document, &heading, "Rust component (wasm)");
+        heading.set_text_content("Rust component (wasm)");
 
         let table = create(&document, "table");
         append_row(&document, &table, "old rows", &count.to_string());

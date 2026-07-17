@@ -59,18 +59,13 @@ fn append_child(parent: &Element, child: &Element) {
     parent.append_child(&element_as_node(child));
 }
 
-fn append_text(document: &Document, parent: &Element, text: &str) {
-    let node = document.create_text_node(text);
-    parent.append_child(&text_as_node(&node));
-}
-
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
     let row = create(document, "tr");
     let th = create(document, "th");
-    append_text(document, &th, label);
+    th.set_text_content(label);
     append_child(&row, &th);
     let td = create(document, "td");
-    append_text(document, &td, value);
+    td.set_text_content(value);
     append_child(&row, &td);
     append_child(table, &row);
 }
@@ -142,7 +137,7 @@ impl Guest for Component {
         };
 
         let heading = create(&document, "h2");
-        append_text(&document, &heading, "Rust component (wasm)");
+        heading.set_text_content("Rust component (wasm)");
 
         let table = create(&document, "table");
         append_row(&document, &table, "nodes", &node_total.to_string());

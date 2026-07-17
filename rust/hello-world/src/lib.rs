@@ -54,8 +54,7 @@ impl Guest for Component {
         heading
             .class_list()
             .add(&["hello".into(), "from-wasm".into()]);
-        let text = document.create_text_node("Hello from Wasm!");
-        heading.append_child(&text_as_node(&text));
+        heading.set_text_content("Hello from Wasm!");
 
         if let Some(body) = document.body() {
             body.append_child(&element_as_node(&heading));
