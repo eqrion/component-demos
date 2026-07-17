@@ -1,5 +1,6 @@
 target/
 node_modules/
+*.wat
 web/dist/
 web/*/*/jco/
 web/*/*/native/

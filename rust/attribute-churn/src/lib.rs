@@ -1,9 +1,52 @@
-#[allow(warnings)]
-mod bindings;
+#![no_std]
+extern crate alloc;
+extern crate core;
 
-use bindings::webidl::baseline::web;
-use bindings::webidl::baseline::web::{Document, Element, TrustedTypeOrString};
-use bindings::Guest;
+use alloc::format;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+
+#[panic_handler]
+fn panic_handler(_info: &core::panic::PanicInfo) -> ! {
+    core::arch::wasm32::unreachable()
+}
+
+#[global_allocator]
+static ALLOCATOR: dlmalloc::GlobalDlmalloc = dlmalloc::GlobalDlmalloc;
+
+#[unsafe(no_mangle)]
+unsafe extern "C" fn cabi_realloc(
+    old_ptr: *mut u8,
+    old_len: usize,
+    align: usize,
+    new_len: usize,
+) -> *mut u8 {
+    use alloc::alloc::{alloc, realloc, Layout};
+
+    unsafe {
+        let ptr = if old_len == 0 {
+            if new_len == 0 {
+                return align as *mut u8;
+            }
+            alloc(Layout::from_size_align_unchecked(new_len, align))
+        } else {
+            realloc(
+                old_ptr,
+                Layout::from_size_align_unchecked(old_len, align),
+                new_len,
+            )
+        };
+        if ptr.is_null() {
+            core::arch::wasm32::unreachable();
+        }
+        ptr
+    }
+}
+
+wit_bindgen::generate!({
+    world: "attribute-churn",
+    path: "wit",
+});
 
 struct Component;
 
@@ -14,12 +57,12 @@ fn create(document: &Document, tag: &str) -> Element {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&web::element_as_node(child));
+    parent.append_child(&element_as_node(child));
 }
 
 fn append_text(document: &Document, parent: &Element, text: &str) {
     let node = document.create_text_node(text);
-    parent.append_child(&web::text_as_node(&node));
+    parent.append_child(&text_as_node(&node));
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_write: &str) {
@@ -38,7 +81,7 @@ fn build_elements(document: &Document, count: u32) -> Vec<Element> {
 
 impl Guest for Component {
     fn run(elements: u32, frames: u32) {
-        let document = web::get_window().document();
+        let document = get_window().document();
         let elements_n = elements.max(1);
         let frames_n = frames.max(1);
         let total_writes = elements_n as f64 * frames_n as f64 * ATTRS.len() as f64;
@@ -48,7 +91,7 @@ impl Guest for Component {
         // carries all of its attributes at once. Both write identical values;
         // only the number of boundary crossings differs.
         let individual = build_elements(&document, elements_n);
-        let individual_start = web::now();
+        let individual_start = now();
         for frame in 0..frames_n {
             for el in &individual {
                 for (i, name) in ATTRS.iter().enumerate() {
@@ -56,10 +99,10 @@ impl Guest for Component {
                 }
             }
         }
-        let individual_ms = web::now() - individual_start;
+        let individual_ms = now() - individual_start;
 
         let batched = build_elements(&document, elements_n);
-        let batched_start = web::now();
+        let batched_start = now();
         for frame in 0..frames_n {
             for el in &batched {
                 let pairs: Vec<(String, String)> = ATTRS
@@ -70,7 +113,7 @@ impl Guest for Component {
                 el.set_attributes(&pairs);
             }
         }
-        let batched_ms = web::now() - batched_start;
+        let batched_ms = now() - batched_start;
 
         let individual_ns = individual_ms * 1_000_000.0 / total_writes;
         let batched_ns = batched_ms * 1_000_000.0 / total_writes;
@@ -103,10 +146,10 @@ impl Guest for Component {
         );
 
         if let Some(body) = document.body() {
-            body.append_child(&web::element_as_node(&heading));
-            body.append_child(&web::element_as_node(&table));
+            body.append_child(&element_as_node(&heading));
+            body.append_child(&element_as_node(&table));
         }
     }
 }
 
-bindings::export!(Component with_types_in bindings);
+export!(Component);

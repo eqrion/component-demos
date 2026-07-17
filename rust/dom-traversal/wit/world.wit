@@ -1,7 +1,66 @@
 package demos:dom-traversal;
 
 world dom-traversal {
-    import webidl:baseline/web;
+  resource document {
+    body: func() -> option<html-element>;
+    create-element: func(local-name: string) -> element;
+    create-text-node: func(data: string) -> text;
+    get-element-by-id: func(element-id: string) -> option<element>;
+    get-elements-by-class-name: func(class-name: string) -> list<element>;
+  }
+  resource dom-token-list {
+    add: func(tokens: list<string>);
+  }
+  resource canvas-rendering-context2d {
+    fill-rect: func(x: f64, y: f64, width: f64, height: f64);
+    get-image-data: func(x: f64, y: f64, width: f64, height: f64) -> list<u8>;
+    put-image-data: func(data: list<u8>, x: f64, y: f64, width: f64, height: f64);
+    set-fill-style: func(value: string);
+  }
+  resource element {
+    append-child: func(node: borrow<node>) -> node;
+    class-list: func() -> dom-token-list;
+    get-context2d: func() -> canvas-rendering-context2d;
+    insert-before: func(node: borrow<node>, reference: borrow<node>) -> node;
+    remove: func();
+    set-attribute: func(qualified-name: string, value: trusted-type-or-string);
+    set-attributes: func(pairs: list<tuple<string, string>>);
+  }
+  resource html-element {
+    append-child: func(node: borrow<node>) -> node;
+  }
+  resource node {
+    first-child: func() -> option<node>;
+    next-sibling: func() -> option<node>;
+    text-content: func() -> string;
+    set-text-content: func(value: string);
+  }
+  resource text {
+  }
+  resource trusted-html {
+  }
+  variant trusted-html-or-trusted-script-or-trusted-script-url {
+    trusted-html(trusted-html),
+    trusted-script(trusted-script),
+    trusted-script-url(trusted-script-url),
+  }
+  resource trusted-script {
+  }
+  resource trusted-script-url {
+  }
+  type trusted-type = trusted-html-or-trusted-script-or-trusted-script-url;
+  variant trusted-type-or-string {
+    trusted-type(trusted-type),
+    %string(string),
+  }
+  resource window {
+    document: func() -> document;
+  }
 
-    export run: func(node-count: u32, iterations: u32);
+  import element-as-node: func(v: borrow<element>) -> node;
+  import get-window: func() -> window;
+  import now: func() -> f64;
+  import text-as-node: func(v: borrow<text>) -> node;
+
+  export run: func(node-count: u32, iterations: u32);
 }

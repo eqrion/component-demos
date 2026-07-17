@@ -11,8 +11,24 @@ cd "$(dirname "$0")"
 component="$1"
 outdir="$2"
 
+host="../../../host/web-host.js"
+
 ./node_modules/.bin/jco transpile "$component" \
-    --map webidl:baseline/web=../../../host/web-host.js \
+    --map document="$host#Document" \
+    --map dom-token-list="$host#DomTokenList" \
+    --map canvas-rendering-context2d="$host#CanvasRenderingContext2d" \
+    --map element="$host#Element" \
+    --map html-element="$host#HtmlElement" \
+    --map node="$host#Node" \
+    --map text="$host#Text" \
+    --map trusted-html="$host#TrustedHtml" \
+    --map trusted-script="$host#TrustedScript" \
+    --map trusted-script-url="$host#TrustedScriptUrl" \
+    --map window="$host#Window" \
+    --map get-window="$host#getWindow" \
+    --map now="$host#now" \
+    --map element-as-node="$host#elementAsNode" \
+    --map text-as-node="$host#textAsNode" \
     -o "$outdir"
 
 # Emit a .wat next to each core wasm as a debugging aid (needs wasm-tools).

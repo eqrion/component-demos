@@ -1,7 +1,0 @@
-package demos:dom-query;
-
-world dom-query {
-    import webidl:baseline/web;
-
-    export run: func(count: u32, iterations: u32);
-}

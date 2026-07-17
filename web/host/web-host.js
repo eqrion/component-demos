@@ -1,6 +1,10 @@
-// Host implementation of the curated `webidl:baseline/web` interface
-// (see ../../web.wit) for the demo components, wired in via
-// `jco transpile --map webidl:baseline/web=<this file>`.
+// Host implementation of the demos' curated web API. Every demo component
+// declares its own flat (non-instance) WIT imports rather than importing a
+// named interface, so there's no single `webidl:baseline/web` instance to
+// map -- `web/transpile.sh` maps each flat import name individually via
+// `jco transpile --map <name>=web-host.js#<NamedExport>`, all pointing at
+// this one file. One class per WIT resource, one method per resource
+// function, camelCased.
 //
 // jco can auto-bind a `webidl:` namespaced import straight to `globalThis`
 // (see https://bytecodealliance.github.io/jco/transpiling.html), which
@@ -10,9 +14,7 @@
 // returning the same object) doesn't match how our WIT expresses casts
 // (free functions, not resource methods) -- see
 // ~/src/webidl-index/canonwit/JCO_COMPAT.md for the full writeup. This
-// file is the fallback: plain classes wrapping real DOM objects, matching
-// exactly the shape jco expects from a `--map`-provided module (one class
-// per WIT resource, one method per resource function, camelCased).
+// file is the fallback.
 
 class Node {
   constructor(raw) {

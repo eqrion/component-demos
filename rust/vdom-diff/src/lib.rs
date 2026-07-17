@@ -1,10 +1,72 @@
-#[allow(warnings)]
-mod bindings;
+#![no_std]
+extern crate alloc;
+extern crate core;
 
-use bindings::webidl::baseline::web;
-use bindings::webidl::baseline::web::{Document, Element};
-use bindings::Guest;
-use std::collections::HashMap;
+use alloc::collections::BTreeMap;
+use alloc::format;
+use alloc::string::{String, ToString};
+use alloc::vec;
+use alloc::vec::Vec;
+
+#[panic_handler]
+fn panic_handler(_info: &core::panic::PanicInfo) -> ! {
+    core::arch::wasm32::unreachable()
+}
+
+#[global_allocator]
+static ALLOCATOR: dlmalloc::GlobalDlmalloc = dlmalloc::GlobalDlmalloc;
+
+#[unsafe(no_mangle)]
+unsafe extern "C" fn cabi_realloc(
+    old_ptr: *mut u8,
+    old_len: usize,
+    align: usize,
+    new_len: usize,
+) -> *mut u8 {
+    use alloc::alloc::{alloc, realloc, Layout};
+
+    unsafe {
+        let ptr = if old_len == 0 {
+            if new_len == 0 {
+                return align as *mut u8;
+            }
+            alloc(Layout::from_size_align_unchecked(new_len, align))
+        } else {
+            realloc(
+                old_ptr,
+                Layout::from_size_align_unchecked(old_len, align),
+                new_len,
+            )
+        };
+        if ptr.is_null() {
+            core::arch::wasm32::unreachable();
+        }
+        ptr
+    }
+}
+
+wit_bindgen::generate!({
+    world: "vdom-diff",
+    path: "wit",
+});
+
+// `String`/`&str` equality lowers to a `memcmp` call, which isn't provided
+// without libc on this target.
+#[unsafe(no_mangle)]
+unsafe extern "C" fn memcmp(a: *const u8, b: *const u8, len: usize) -> i32 {
+    let (a, b) = unsafe {
+        (
+            core::slice::from_raw_parts(a, len),
+            core::slice::from_raw_parts(b, len),
+        )
+    };
+    for i in 0..len {
+        if a[i] != b[i] {
+            return a[i] as i32 - b[i] as i32;
+        }
+    }
+    0
+}
 
 struct Component;
 
@@ -19,16 +81,16 @@ fn create(document: &Document, tag: &str) -> Element {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&web::element_as_node(child));
+    parent.append_child(&element_as_node(child));
 }
 
 fn insert_before(parent: &Element, child: &Element, reference: &Element) {
-    parent.insert_before(&web::element_as_node(child), &web::element_as_node(reference));
+    parent.insert_before(&element_as_node(child), &element_as_node(reference));
 }
 
 fn append_text(document: &Document, parent: &Element, text: &str) {
     let node = document.create_text_node(text);
-    parent.append_child(&web::text_as_node(&node));
+    parent.append_child(&text_as_node(&node));
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
@@ -108,19 +170,19 @@ fn lis_mask(values: &[i64]) -> Vec<bool> {
 
 impl Guest for Component {
     fn run(row_count: u32) {
-        let document = web::get_window().document();
+        let document = get_window().document();
         let count = row_count.max(1);
 
         let container = create(&document, "ul");
         if let Some(body) = document.body() {
-            body.append_child(&web::element_as_node(&container));
+            body.append_child(&element_as_node(&container));
         }
 
         let rows: Vec<Row> = (0..count)
             .map(|key| {
                 let element = create(&document, "li");
                 let label = format!("row {key}");
-                web::element_as_node(&element).set_text_content(&label);
+                element_as_node(&element).set_text_content(&label);
                 append_child(&container, &element);
                 Row { key, label, element }
             })
@@ -128,9 +190,9 @@ impl Guest for Component {
 
         let new_keys = build_new_keys(count);
 
-        let diff_start = web::now();
+        let diff_start = now();
 
-        let mut old_index_of: HashMap<u32, usize> = HashMap::new();
+        let mut old_index_of: BTreeMap<u32, usize> = BTreeMap::new();
         for (i, r) in rows.iter().enumerate() {
             old_index_of.insert(r.key, i);
         }
@@ -159,7 +221,7 @@ impl Guest for Component {
                 Some(&old_i) => {
                     let mut row = old_rows[old_i].take().unwrap();
                     if row.label != label {
-                        web::element_as_node(&row.element).set_text_content(&label);
+                        element_as_node(&row.element).set_text_content(&label);
                         row.label = label;
                         updates += 1;
                     }
@@ -167,7 +229,7 @@ impl Guest for Component {
                 }
                 None => {
                     let element = create(&document, "li");
-                    web::element_as_node(&element).set_text_content(&label);
+                    element_as_node(&element).set_text_content(&label);
                     inserts += 1;
                     Row { key, label, element }
                 }
@@ -202,7 +264,7 @@ impl Guest for Component {
             anchor = Some(element);
         }
 
-        let diff_ms = web::now() - diff_start;
+        let diff_ms = now() - diff_start;
         let total_ops = inserts + removes + moves + updates;
         let ns_per_op = if total_ops > 0 {
             diff_ms.max(0.001) * 1_000_000.0 / total_ops as f64
@@ -224,10 +286,10 @@ impl Guest for Component {
         append_row(&document, &table, "ns/op", &format!("{ns_per_op:.1}"));
 
         if let Some(body) = document.body() {
-            body.append_child(&web::element_as_node(&heading));
-            body.append_child(&web::element_as_node(&table));
+            body.append_child(&element_as_node(&heading));
+            body.append_child(&element_as_node(&table));
         }
     }
 }
 
-bindings::export!(Component with_types_in bindings);
+export!(Component);

@@ -1,9 +1,51 @@
-#[allow(warnings)]
-mod bindings;
+#![no_std]
+extern crate alloc;
+extern crate core;
 
-use bindings::webidl::baseline::web;
-use bindings::webidl::baseline::web::{Document, Element, Node};
-use bindings::Guest;
+use alloc::format;
+use alloc::string::ToString;
+
+#[panic_handler]
+fn panic_handler(_info: &core::panic::PanicInfo) -> ! {
+    core::arch::wasm32::unreachable()
+}
+
+#[global_allocator]
+static ALLOCATOR: dlmalloc::GlobalDlmalloc = dlmalloc::GlobalDlmalloc;
+
+#[unsafe(no_mangle)]
+unsafe extern "C" fn cabi_realloc(
+    old_ptr: *mut u8,
+    old_len: usize,
+    align: usize,
+    new_len: usize,
+) -> *mut u8 {
+    use alloc::alloc::{alloc, realloc, Layout};
+
+    unsafe {
+        let ptr = if old_len == 0 {
+            if new_len == 0 {
+                return align as *mut u8;
+            }
+            alloc(Layout::from_size_align_unchecked(new_len, align))
+        } else {
+            realloc(
+                old_ptr,
+                Layout::from_size_align_unchecked(old_len, align),
+                new_len,
+            )
+        };
+        if ptr.is_null() {
+            core::arch::wasm32::unreachable();
+        }
+        ptr
+    }
+}
+
+wit_bindgen::generate!({
+    world: "dom-traversal",
+    path: "wit",
+});
 
 struct Component;
 
@@ -14,12 +56,12 @@ fn create(document: &Document, tag: &str) -> Element {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&web::element_as_node(child));
+    parent.append_child(&element_as_node(child));
 }
 
 fn append_text(document: &Document, parent: &Element, text: &str) {
     let node = document.create_text_node(text);
-    parent.append_child(&web::text_as_node(&node));
+    parent.append_child(&text_as_node(&node));
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
@@ -77,20 +119,20 @@ fn traverse(node: Option<Node>) -> u32 {
 
 impl Guest for Component {
     fn run(node_count: u32, iterations: u32) {
-        let document = web::get_window().document();
+        let document = get_window().document();
         let depth = choose_depth(node_count.max(1));
         let iters = iterations.max(1) as u64;
 
-        let build_start = web::now();
+        let build_start = now();
         let root = build_tree(&document, depth);
-        let build_ms = web::now() - build_start;
+        let build_ms = now() - build_start;
 
         let mut total_counted: u64 = 0;
-        let traverse_start = web::now();
+        let traverse_start = now();
         for _ in 0..iters {
-            total_counted += traverse(Some(web::element_as_node(&root))) as u64;
+            total_counted += traverse(Some(element_as_node(&root))) as u64;
         }
-        let traverse_ms = web::now() - traverse_start;
+        let traverse_ms = now() - traverse_start;
 
         let node_total = total_counted / iters;
         let ns_per_node = if node_total > 0 {
@@ -110,10 +152,10 @@ impl Guest for Component {
         append_row(&document, &table, "traverse (per node)", &format!("{ns_per_node:.1} ns"));
 
         if let Some(body) = document.body() {
-            body.append_child(&web::element_as_node(&heading));
-            body.append_child(&web::element_as_node(&table));
+            body.append_child(&element_as_node(&heading));
+            body.append_child(&element_as_node(&table));
         }
     }
 }
 
-bindings::export!(Component with_types_in bindings);
+export!(Component);

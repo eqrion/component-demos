@@ -4,19 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-wit-bindgen-rt = { version = "=0.41.0", features = ["bitflags"] }
+wit-bindgen = { version = "0.57", default-features = false, features = ["macros"] }
+dlmalloc = { version = "0.2", features = ["global"] }
 
 [lib]
 crate-type = ["cdylib"]
 
-[package.metadata.component]
-package = "demos:vdom-diff"
-
-[package.metadata.component.target]
-world = "vdom-diff"
-path = "wit"
-
-[package.metadata.component.target.dependencies]
-"webidl:baseline" = { path = "../../web.wit" }
-
-[package.metadata.component.dependencies]
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

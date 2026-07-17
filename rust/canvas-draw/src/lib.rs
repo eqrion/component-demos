@@ -1,9 +1,51 @@
-#[allow(warnings)]
-mod bindings;
+#![no_std]
+extern crate alloc;
+extern crate core;
 
-use bindings::webidl::baseline::web;
-use bindings::webidl::baseline::web::{Document, Element, TrustedTypeOrString};
-use bindings::Guest;
+use alloc::format;
+use alloc::string::ToString;
+
+#[panic_handler]
+fn panic_handler(_info: &core::panic::PanicInfo) -> ! {
+    core::arch::wasm32::unreachable()
+}
+
+#[global_allocator]
+static ALLOCATOR: dlmalloc::GlobalDlmalloc = dlmalloc::GlobalDlmalloc;
+
+#[unsafe(no_mangle)]
+unsafe extern "C" fn cabi_realloc(
+    old_ptr: *mut u8,
+    old_len: usize,
+    align: usize,
+    new_len: usize,
+) -> *mut u8 {
+    use alloc::alloc::{alloc, realloc, Layout};
+
+    unsafe {
+        let ptr = if old_len == 0 {
+            if new_len == 0 {
+                return align as *mut u8;
+            }
+            alloc(Layout::from_size_align_unchecked(new_len, align))
+        } else {
+            realloc(
+                old_ptr,
+                Layout::from_size_align_unchecked(old_len, align),
+                new_len,
+            )
+        };
+        if ptr.is_null() {
+            core::arch::wasm32::unreachable();
+        }
+        ptr
+    }
+}
+
+wit_bindgen::generate!({
+    world: "canvas-draw",
+    path: "wit",
+});
 
 struct Component;
 
@@ -19,12 +61,12 @@ fn set_attr(element: &Element, name: &str, value: &str) {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&web::element_as_node(child));
+    parent.append_child(&element_as_node(child));
 }
 
 fn append_text(document: &Document, parent: &Element, text: &str) {
     let node = document.create_text_node(text);
-    parent.append_child(&web::text_as_node(&node));
+    parent.append_child(&text_as_node(&node));
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
@@ -45,7 +87,7 @@ impl Guest for Component {
     // DOM-specific (resource-handle/string) cost or shows up for any
     // frequent host call.
     fn run(rects: u32) {
-        let document = web::get_window().document();
+        let document = get_window().document();
         let count = rects.max(1);
 
         let canvas = create(&document, "canvas");
@@ -55,13 +97,13 @@ impl Guest for Component {
         ctx.set_fill_style("steelblue");
 
         let bound = CANVAS_SIZE - RECT_SIZE;
-        let start = web::now();
+        let start = now();
         for i in 0..count {
             let x = (i as f64 * 7.0) % bound;
             let y = (i as f64 * 13.0) % bound;
             ctx.fill_rect(x, y, RECT_SIZE, RECT_SIZE);
         }
-        let ms = web::now() - start;
+        let ms = now() - start;
         let ns_per_call = ms * 1_000_000.0 / count as f64;
 
         let heading = create(&document, "h2");
@@ -73,11 +115,11 @@ impl Guest for Component {
         append_row(&document, &table, "per call", &format!("{ns_per_call:.1} ns"));
 
         if let Some(body) = document.body() {
-            body.append_child(&web::element_as_node(&heading));
-            body.append_child(&web::element_as_node(&canvas));
-            body.append_child(&web::element_as_node(&table));
+            body.append_child(&element_as_node(&heading));
+            body.append_child(&element_as_node(&canvas));
+            body.append_child(&element_as_node(&table));
         }
     }
 }
 
-bindings::export!(Component with_types_in bindings);
+export!(Component);

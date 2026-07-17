@@ -5,9 +5,9 @@ cd "$(dirname "$0")"
 wasm="hello_world"
 webdir="rust/hello-world"
 
-cargo component build
+cargo build --release --target wasm32-wasip2
 
-component="$PWD/target/wasm32-wasip1/debug/$wasm.wasm"
+component="$PWD/target/wasm32-wasip2/release/$wasm.wasm"
 ../../web/transpile.sh "$component" "$webdir/jco"
 mkdir -p "../../web/$webdir/native"
 cp "$component" "../../web/$webdir/native/"

@@ -1,9 +1,51 @@
-#[allow(warnings)]
-mod bindings;
+#![no_std]
+extern crate alloc;
+extern crate core;
 
-use bindings::webidl::baseline::web;
-use bindings::webidl::baseline::web::{Document, Element};
-use bindings::Guest;
+use alloc::format;
+use alloc::vec::Vec;
+
+#[panic_handler]
+fn panic_handler(_info: &core::panic::PanicInfo) -> ! {
+    core::arch::wasm32::unreachable()
+}
+
+#[global_allocator]
+static ALLOCATOR: dlmalloc::GlobalDlmalloc = dlmalloc::GlobalDlmalloc;
+
+#[unsafe(no_mangle)]
+unsafe extern "C" fn cabi_realloc(
+    old_ptr: *mut u8,
+    old_len: usize,
+    align: usize,
+    new_len: usize,
+) -> *mut u8 {
+    use alloc::alloc::{alloc, realloc, Layout};
+
+    unsafe {
+        let ptr = if old_len == 0 {
+            if new_len == 0 {
+                return align as *mut u8;
+            }
+            alloc(Layout::from_size_align_unchecked(new_len, align))
+        } else {
+            realloc(
+                old_ptr,
+                Layout::from_size_align_unchecked(old_len, align),
+                new_len,
+            )
+        };
+        if ptr.is_null() {
+            core::arch::wasm32::unreachable();
+        }
+        ptr
+    }
+}
+
+wit_bindgen::generate!({
+    world: "table-rows",
+    path: "wit",
+});
 
 struct Component;
 
@@ -12,12 +54,12 @@ fn create(document: &Document, tag: &str) -> Element {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&web::element_as_node(child));
+    parent.append_child(&element_as_node(child));
 }
 
 fn append_text(document: &Document, parent: &Element, text: &str) {
     let node = document.create_text_node(text);
-    parent.append_child(&web::text_as_node(&node));
+    parent.append_child(&text_as_node(&node));
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_row: &str) {
@@ -39,17 +81,17 @@ impl Guest for Component {
     // doesn't support callbacks into a component yet), so the phases run
     // as a fixed script rather than in response to real interaction.
     fn run(row_count: u32) {
-        let document = web::get_window().document();
+        let document = get_window().document();
         let count = row_count.max(1);
 
         let table_el = create(&document, "table");
         let tbody = create(&document, "tbody");
         append_child(&table_el, &tbody);
         if let Some(body) = document.body() {
-            body.append_child(&web::element_as_node(&table_el));
+            body.append_child(&element_as_node(&table_el));
         }
 
-        let create_start = web::now();
+        let create_start = now();
         let mut rows = Vec::with_capacity(count as usize);
         for i in 0..count {
             let tr = create(&document, "tr");
@@ -59,23 +101,23 @@ impl Guest for Component {
             append_child(&tbody, &tr);
             rows.push((tr, td));
         }
-        let create_ms = web::now() - create_start;
+        let create_ms = now() - create_start;
 
-        let update_start = web::now();
+        let update_start = now();
         let mut updated: u32 = 0;
         for (i, (_, td)) in rows.iter().enumerate() {
             if i % 10 == 0 {
-                web::element_as_node(td).set_text_content(&format!("row {i} !!!"));
+                element_as_node(td).set_text_content(&format!("row {i} !!!"));
                 updated += 1;
             }
         }
-        let update_ms = web::now() - update_start;
+        let update_ms = now() - update_start;
 
-        let clear_start = web::now();
+        let clear_start = now();
         for (tr, _) in &rows {
             tr.remove();
         }
-        let clear_ms = web::now() - clear_start;
+        let clear_ms = now() - clear_start;
 
         let heading = create(&document, "h2");
         append_text(&document, &heading, "Rust component (wasm)");
@@ -112,10 +154,10 @@ impl Guest for Component {
         );
 
         if let Some(body) = document.body() {
-            body.append_child(&web::element_as_node(&heading));
-            body.append_child(&web::element_as_node(&report));
+            body.append_child(&element_as_node(&heading));
+            body.append_child(&element_as_node(&report));
         }
     }
 }
 
-bindings::export!(Component with_types_in bindings);
+export!(Component);
