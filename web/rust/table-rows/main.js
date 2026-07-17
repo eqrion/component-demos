@@ -1,4 +1,9 @@
-import { run } from "./jco/table_rows.js";
+import { load } from "../../host/loader.js";
+
+const { run } = await load({
+  jco: () => import("./jco/table_rows.js"),
+  wasm: new URL("./native/table_rows.wasm", import.meta.url),
+});
 
 const params = new URLSearchParams(window.location.search);
 const rowCount = Number(params.get("rows") ?? 1000);

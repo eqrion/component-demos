@@ -1,4 +1,9 @@
-import { add, sub } from "./jco/calculator.js";
+import { load } from "../../host/loader.js";
+
+const { add, sub } = await load({
+  jco: () => import("./jco/calculator.js"),
+  wasm: new URL("./native/calculator.wasm", import.meta.url),
+});
 
 const a = document.createElement("input");
 a.type = "number";

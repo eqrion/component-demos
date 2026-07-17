@@ -1,4 +1,9 @@
-import { run } from "./jco/attribute_churn.js";
+import { load } from "../../host/loader.js";
+
+const { run } = await load({
+  jco: () => import("./jco/attribute_churn.js"),
+  wasm: new URL("./native/attribute_churn.wasm", import.meta.url),
+});
 
 const params = new URLSearchParams(window.location.search);
 const elementCount = Number(params.get("elements") ?? 2000);

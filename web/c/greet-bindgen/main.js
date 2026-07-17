@@ -1,4 +1,9 @@
-import { greet } from "./jco/greet.js";
+import { load } from "../../host/loader.js";
+
+const { greet } = await load({
+  jco: () => import("./jco/greet.js"),
+  wasm: new URL("./native/greet.wasm", import.meta.url),
+});
 
 const name = document.createElement("input");
 name.value = "world";

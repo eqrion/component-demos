@@ -1,4 +1,9 @@
-import { run } from "./jco/string_marshalling.js";
+import { load } from "../../host/loader.js";
+
+const { run } = await load({
+  jco: () => import("./jco/string_marshalling.js"),
+  wasm: new URL("./native/string_marshalling.wasm", import.meta.url),
+});
 
 const params = new URLSearchParams(window.location.search);
 const minMs = Number(params.get("ms") ?? 10);

@@ -13,4 +13,4 @@ export let Window = globalThis.Window;
 export let getWindow = () => globalThis;
 export let textAsNode = (v) => v;
 export let elementAsNode = (v) => v;
-export let now = performance.now;
+export let now = () => performance.now();

@@ -1,4 +1,9 @@
-import { run } from "./jco/dom_query.js";
+import { load } from "../../host/loader.js";
+
+const { run } = await load({
+  jco: () => import("./jco/dom_query.js"),
+  wasm: new URL("./native/dom_query.wasm", import.meta.url),
+});
 
 const params = new URLSearchParams(window.location.search);
 const count = Number(params.get("count") ?? 5000);

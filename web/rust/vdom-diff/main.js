@@ -1,4 +1,9 @@
-import { run } from "./jco/vdom_diff.js";
+import { load } from "../../host/loader.js";
+
+const { run } = await load({
+  jco: () => import("./jco/vdom_diff.js"),
+  wasm: new URL("./native/vdom_diff.wasm", import.meta.url),
+});
 
 const params = new URLSearchParams(window.location.search);
 const rowCount = Number(params.get("rows") ?? 1000);

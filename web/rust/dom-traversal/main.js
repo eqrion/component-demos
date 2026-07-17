@@ -1,4 +1,9 @@
-import { run } from "./jco/dom_traversal.js";
+import { load } from "../../host/loader.js";
+
+const { run } = await load({
+  jco: () => import("./jco/dom_traversal.js"),
+  wasm: new URL("./native/dom_traversal.wasm", import.meta.url),
+});
 
 const params = new URLSearchParams(window.location.search);
 const nodeCount = Number(params.get("nodes") ?? 50000);

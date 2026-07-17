@@ -1,4 +1,9 @@
-import { run } from "./jco/canvas_draw.js";
+import { load } from "../../host/loader.js";
+
+const { run } = await load({
+  jco: () => import("./jco/canvas_draw.js"),
+  wasm: new URL("./native/canvas_draw.wasm", import.meta.url),
+});
 
 const params = new URLSearchParams(window.location.search);
 const rects = Number(params.get("rects") ?? 50000);
