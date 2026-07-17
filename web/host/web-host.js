@@ -1,22 +1,8 @@
-// Host implementation of the demos' curated web API. Every demo component
-// declares its own flat (non-instance) WIT imports rather than importing a
-// named interface, so there's no single `webidl:baseline/web` instance to
-// map -- `web/transpile.sh` maps each flat import name individually via
-// `jco transpile --map <name>=web-host.js#<NamedExport>`, all pointing at
-// this one file. One class per WIT resource, one method per resource
-// function, camelCased.
-//
-// jco can auto-bind a `webidl:` namespaced import straight to `globalThis`
-// (see https://bytecodealliance.github.io/jco/transpiling.html), which
-// would mean no hand-written glue at all. We tried it and hit two jco
-// 1.25.2 bugs: its WebIDL proxy crashes on any `option<T>` argument that
-// lowers to JS `undefined`, and its cast heuristic (`resource.asTarget()`
-// returning the same object) doesn't match how our WIT expresses casts
-// (free functions, not resource methods) -- see
-// ~/src/webidl-index/canonwit/JCO_COMPAT.md for the full writeup. This
-// file is the fallback.
+// We need to wrap the actual DOM methods so that we can convert getters/
+// setters into methods. jco has no (apparent) way to express an import is
+// a getter or setter.
 
-class Node {
+export class Node {
   constructor(raw) {
     this.raw = raw;
   }
@@ -124,9 +110,6 @@ class Window {
   }
 }
 
-// Never constructed: `trusted-type-or-string` values we produce are
-// always the `string` case, but the classes still need to exist so the
-// generated import list resolves.
 class TrustedHtml {}
 class TrustedScript {}
 class TrustedScriptUrl {}
@@ -137,7 +120,6 @@ export {
   DomTokenList,
   Element,
   HtmlElement,
-  Node,
   Text,
   TrustedHtml,
   TrustedScript,
