@@ -1,0 +1,17 @@
+{
+  "rust-analyzer.check.allTargets": false,
+  "rust-analyzer.linkedProjects": [
+    "rust/attribute-churn/Cargo.toml",
+    "rust/calculator/Cargo.toml",
+    "rust/calculator-raw/Cargo.toml",
+    "rust/canvas-draw/Cargo.toml",
+    "rust/canvas-pixels/Cargo.toml",
+    "rust/dom-query/Cargo.toml",
+    "rust/dom-traversal/Cargo.toml",
+    "rust/hello-world/Cargo.toml",
+    "rust/string-marshalling/Cargo.toml",
+    "rust/table-rows/Cargo.toml",
+    "rust/todomvc/Cargo.toml",
+    "rust/vdom-diff/Cargo.toml"
+  ]
+}

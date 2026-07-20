@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 wasm="canvas_draw"
 webdir="rust/canvas-draw"
 
-cargo build --release --target wasm32-wasip2
+cargo build --release
 
 component="$PWD/target/wasm32-wasip2/release/$wasm.wasm"
 ../../web/transpile.sh "$component" "$webdir/jco"

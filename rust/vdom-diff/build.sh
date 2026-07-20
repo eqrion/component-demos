@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 wasm="vdom_diff"
 webdir="rust/vdom-diff"
 
-cargo build --release --target wasm32-wasip2
+cargo build --release
 
 component="$PWD/target/wasm32-wasip2/release/$wasm.wasm"
 ../../web/transpile.sh "$component" "$webdir/jco"
