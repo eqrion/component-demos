@@ -1,7 +1,8 @@
 import "todomvc-common/base.css";
 import "todomvc-app-css/index.css";
-import { load } from "../../host/loader.js";
+import { init, load } from "../../host/common.js";
 
+init();
 const { run } = await load({
   jco: () => import("./jco/todomvc.js"),
   wasm: new URL("./native/todomvc.wasm", import.meta.url),

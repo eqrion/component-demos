@@ -1,5 +1,6 @@
-import { load } from "../../host/loader.js";
+import { init, load } from "../../host/common.js";
 
+init();
 const { run } = await load({
   jco: () => import("./jco/canvas_pixels.js"),
   wasm: new URL("./native/canvas_pixels.wasm", import.meta.url),

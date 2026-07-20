@@ -1,5 +1,6 @@
-import { load } from "../../host/loader.js";
+import { init, load } from "../../host/common.js";
 
+init();
 const { run } = await load({
   jco: () => import("./jco/vdom_diff.js"),
   wasm: new URL("./native/vdom_diff.wasm", import.meta.url),

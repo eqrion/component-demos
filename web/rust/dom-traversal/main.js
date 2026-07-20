@@ -1,5 +1,6 @@
-import { load } from "../../host/loader.js";
+import { init, load } from "../../host/common.js";
 
+init();
 const { run } = await load({
   jco: () => import("./jco/dom_traversal.js"),
   wasm: new URL("./native/dom_traversal.wasm", import.meta.url),

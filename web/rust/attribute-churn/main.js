@@ -1,5 +1,6 @@
-import { load } from "../../host/loader.js";
+import { init, load } from "../../host/common.js";
 
+init();
 const { run } = await load({
   jco: () => import("./jco/attribute_churn.js"),
   wasm: new URL("./native/attribute_churn.wasm", import.meta.url),
