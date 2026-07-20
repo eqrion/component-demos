@@ -1,5 +1,6 @@
-import { load } from "../../host/loader.js";
+import { init, load } from "../../host/common.js";
 
+init();
 const { run } = await load({
   jco: () => import("./jco/string_marshalling.js"),
   wasm: new URL("./native/string_marshalling.wasm", import.meta.url),
@@ -34,7 +35,7 @@ function renderReport(title, rows) {
 
   const table = document.createElement("table");
   const header = document.createElement("tr");
-  for (const label of ["size", "set ns/call", "set MB/s", "get ns/call", "get MB/s"]) {
+  for (const label of ["size", "set µs/call", "set MB/s", "get µs/call", "get MB/s"]) {
     const th = document.createElement("th");
     th.textContent = label;
     header.appendChild(th);
@@ -69,21 +70,21 @@ function runRawJs(minMs) {
       for (let i = 0; i < reps; i++) void el.textContent;
     });
 
-    const setNsPerCall = (setMs * 1_000_000) / setReps;
-    const getNsPerCall = (getMs * 1_000_000) / getReps;
+    const setUsPerCall = (setMs * 1_000) / setReps;
+    const getUsPerCall = (getMs * 1_000) / getReps;
     const setMbPerS = (size * setReps) / (setMs * 1_000);
     const getMbPerS = (size * getReps) / (getMs * 1_000);
 
     rows.push([
       `${size} B`,
-      setNsPerCall.toFixed(1),
+      setUsPerCall.toFixed(3),
       setMbPerS.toFixed(1),
-      getNsPerCall.toFixed(1),
+      getUsPerCall.toFixed(3),
       getMbPerS.toFixed(1),
     ]);
   }
 
-  renderReport("Raw JS", rows);
+  renderReport("JavaScript", rows);
 }
 
 runRawJs(minMs);

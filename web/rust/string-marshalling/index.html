@@ -1,11 +1,22 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8" />
-  <title>String marshalling benchmark - wasm component</title>
+  <meta charset="utf-8">
+  <title>String marshalling benchmark</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
-  <p><a href="../../index.html">&larr; back</a></p>
+  <div id="nav"></div>
+
+  <p>
+    Repeatedly sets and gets the <code>textContent</code> of an offscreen div with a string of length <code>size</code>.
+    This exercises the speed of text encoding and decoding via the component model.
+  </p>
+
+  <script src="/common.js"></script>
   <script type="module" src="./main.js"></script>
 </body>
+
 </html>

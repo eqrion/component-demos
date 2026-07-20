@@ -20,7 +20,7 @@ unsafe extern "C" fn cabi_realloc(
     align: usize,
     new_len: usize,
 ) -> *mut u8 {
-    use alloc::alloc::{alloc, realloc, Layout};
+    use alloc::alloc::{Layout, alloc, realloc};
 
     unsafe {
         let ptr = if old_len == 0 {
@@ -52,29 +52,21 @@ struct Component;
 const SIZES: [usize; 5] = [8, 128, 1024, 16384, 262144];
 const MAX_REPS: u64 = 1 << 24;
 
-fn create(document: &Document, tag: &str) -> Element {
-    document.create_element(tag)
-}
-
-fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&element_as_node(child));
-}
-
 fn append_row(document: &Document, table: &Element, cell_tag: &str, cells: &[String]) {
-    let row = create(document, "tr");
+    let row = document.create_element("tr");
     for cell in cells {
-        let td = create(document, cell_tag);
+        let td = document.create_element(cell_tag);
         td.set_text_content(cell);
-        append_child(&row, &td);
+        row.append_child(&element_as_node(&td));
     }
-    append_child(table, &row);
+    table.append_child(&element_as_node(&row));
 }
 
 // Autoranging timer: doubles the rep count until at least `min_ms` has
 // elapsed, so cheap ops (need many reps to clear timer resolution) and
 // expensive ops (need few) both get a trustworthy measurement.
 fn measure(min_ms: f64, mut run: impl FnMut(u64)) -> (u64, f64) {
-    let mut reps: u64 = 1;
+    let mut reps: u64 = 100;
     loop {
         let start = now();
         run(reps);
@@ -89,22 +81,24 @@ fn measure(min_ms: f64, mut run: impl FnMut(u64)) -> (u64, f64) {
 impl Guest for Component {
     fn run(min_ms: u32) {
         let document = get_window().document();
-        let el = create(&document, "div");
+        let body = document.body().unwrap();
+
+        let el = document.create_element("div");
         let min_ms = min_ms.max(1) as f64;
 
-        let heading = create(&document, "h2");
-        heading.set_text_content("Rust component (wasm)");
+        let heading = document.create_element("h2");
+        heading.set_text_content("Wasm component (Rust)");
 
-        let table = create(&document, "table");
+        let table = document.create_element("table");
         append_row(
             &document,
             &table,
             "th",
             &[
                 String::from("size"),
-                String::from("set ns/call"),
+                String::from("set µs/call"),
                 String::from("set MB/s"),
-                String::from("get ns/call"),
+                String::from("get µs/call"),
                 String::from("get MB/s"),
             ],
         );
@@ -125,8 +119,8 @@ impl Guest for Component {
                 }
             });
 
-            let set_ns_per_call = set_ms * 1_000_000.0 / set_reps as f64;
-            let get_ns_per_call = get_ms * 1_000_000.0 / get_reps as f64;
+            let set_us_per_call = set_ms * 1_000.0 / set_reps as f64;
+            let get_us_per_call = get_ms * 1_000.0 / get_reps as f64;
             let set_mb_per_s = (size as f64 * set_reps as f64) / (set_ms * 1_000.0);
             let get_mb_per_s = (size as f64 * get_reps as f64) / (get_ms * 1_000.0);
 
@@ -136,18 +130,16 @@ impl Guest for Component {
                 "td",
                 &[
                     format!("{size} B"),
-                    format!("{set_ns_per_call:.1}"),
+                    format!("{set_us_per_call:.3}"),
                     format!("{set_mb_per_s:.1}"),
-                    format!("{get_ns_per_call:.1}"),
+                    format!("{get_us_per_call:.3}"),
                     format!("{get_mb_per_s:.1}"),
                 ],
             );
         }
 
-        if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&heading));
-            body.append_child(&element_as_node(&table));
-        }
+        body.append_child(&element_as_node(&heading));
+        body.append_child(&element_as_node(&table));
     }
 }
 
