@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <title>WASM Component Model demos</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
@@ -11,9 +12,12 @@
   <p>WebAssembly components built from various languages and toolchains.</p>
 
   <h2>Rust</h2>
-  <h3>cargo component (wasip1 -> wasip2 adapter)</h3>
+  <p>Unless stated otherwise, all demos are built using wit-bindgen (<code>wit_bindgen::generate!</code>) and compiled
+    using the <code>wasm32-wasip2</code> target.</p>
   <ul>
     <li><a href="./rust/hello-world/">Hello, world</a></li>
+    <li><a href="./rust/calculator/">Calculator</a></li>
+    <li><a href="./rust/calculator-raw/">Calculator (no WIT)</a></li>
     <li><a href="./rust/todomvc/">TodoMVC (static)</a></li>
     <li><a href="./rust/dom-traversal/">DOM traversal</a></li>
     <li><a href="./rust/string-marshalling/">String marshalling</a></li>
@@ -23,14 +27,6 @@
     <li><a href="./rust/canvas-draw/">Canvas draw</a></li>
     <li><a href="./rust/canvas-pixels/">Canvas pixel transfer</a></li>
     <li><a href="./rust/vdom-diff/">Keyed-list vdom diff</a></li>
-  </ul>
-  <h3>wit-bindgen + wasip2</h3>
-  <ul>
-    <li><a href="./rust/calculator/">Calculator</a></li>
-  </ul>
-  <h3>wasip2 (no WIT)</h3>
-  <ul>
-    <li><a href="./rust/calculator-raw/">Calculator</a></li>
   </ul>
 
   <h2>C</h2>
