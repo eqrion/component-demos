@@ -1,4 +1,5 @@
 import * as webNative from "./web-native.js";
+import * as webHost from "./web-host.js";
 
 function isNative() {
   const backend = new URLSearchParams(location.search).get("backend");
@@ -7,8 +8,10 @@ function isNative() {
 
 export async function load({ jco, wasm }) {
   if (!isNative()) {
+    console.log("using jco");
     return jco();
   }
+  console.log("using native");
   const bytes = await (await fetch(wasm)).arrayBuffer();
   const component = new WebAssembly.Component(bytes);
   const instance = new WebAssembly.ComponentInstance(component, { ...webNative });

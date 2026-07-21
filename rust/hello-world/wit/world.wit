@@ -11,7 +11,7 @@ world hello-world {
   resource element {
     append-child: func(node: borrow<node>) -> node;
     class-list: func() -> dom-token-list;
-    set-text-content: func(value: string);
+    text-content: func(value: string);
   }
   resource html-element {
     append-child: func(node: borrow<node>) -> node;
