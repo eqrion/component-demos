@@ -1,12 +1,21 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <title>DOM query benchmark</title>
   <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
   <div id="nav"></div>
+
+  <p>
+    Insert <span id="numElements">?</span> elements into the DOM, then query them individually and
+    in bulk <span id="iters">?</span> times.
+  </p>
+
   <script type="module" src="./main.js"></script>
 </body>
+
 </html>

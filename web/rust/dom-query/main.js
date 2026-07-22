@@ -7,8 +7,11 @@ const { run } = await load({
 });
 
 const params = new URLSearchParams(window.location.search);
-const count = Number(params.get("count") ?? 5000);
+const numElements = Number(params.get("num_elements") ?? 10000);
 const iterations = Number(params.get("iters") ?? 20);
+window.numElements.textContent = `${numElements}`;
+window.iters.textContent = `${iterations}`;
+await new Promise(res => setTimeout(res, 0)); // redraw page
 
 function renderReport(title, rows) {
   const heading = document.createElement("h2");
@@ -17,7 +20,7 @@ function renderReport(title, rows) {
 
   const table = document.createElement("table");
   const header = document.createElement("tr");
-  for (const label of ["approach", "total ms", "ns/element"]) {
+  for (const label of ["approach", "iterations", "total ms", "µs/element"]) {
     const th = document.createElement("th");
     th.textContent = label;
     header.appendChild(th);
@@ -48,7 +51,7 @@ function runRawJs(count, iterations) {
   }
   document.body.appendChild(container);
 
-  const total = count * iterations;
+  const numIndividualLookups = count * iterations;
 
   const individualStart = performance.now();
   for (let i = 0; i < iterations; i++) {
@@ -64,14 +67,13 @@ function runRawJs(count, iterations) {
   }
   const bulkMs = performance.now() - bulkStart;
 
-  const individualNs = (individualMs * 1_000_000) / total;
-  const bulkNs = (bulkMs * 1_000_000) / total;
+  const usPerIndividual = (individualMs * 1_000) / numIndividualLookups;
 
   renderReport("Raw JS", [
-    ["individual (getElementById x N)", individualMs.toFixed(2), individualNs.toFixed(1)],
-    ["bulk (getElementsByClassName)", bulkMs.toFixed(2), bulkNs.toFixed(1)],
+    ["individual (getElementById)", `${iterations}`, individualMs.toFixed(3), usPerIndividual.toFixed(3)],
+    ["bulk (getElementsByClassName)", `${iterations}`, bulkMs.toFixed(3), "n/a"],
   ]);
 }
 
-runRawJs(count, iterations);
-run(count, iterations);
+runRawJs(numElements, iterations);
+run(numElements, iterations);

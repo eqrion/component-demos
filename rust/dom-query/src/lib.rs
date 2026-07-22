@@ -45,14 +45,21 @@ unsafe extern "C" fn cabi_realloc(
 
 wit_bindgen::generate!({
     world: "dom-query",
-    path: "dom-query.wit",
+    path: "wit",
 });
 
 struct Component;
 
-fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_element: &str) {
+fn append_row(
+    document: &Document,
+    table: &Element,
+    label: &str,
+    iterations: &str,
+    ms: &str,
+    ns_per_element: &str,
+) {
     let row = document.create_element("tr");
-    for value in [label, ms, ns_per_element] {
+    for value in [label, iterations, ms, ns_per_element] {
         let td = document.create_element("td");
         td.text_content(value);
         row.append_child(&td);
@@ -61,35 +68,25 @@ fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_pe
 }
 
 impl Guest for Component {
-    fn run(count: u32, iterations: u32) {
+    fn run(num_elements: u32, iterations: u32) {
         let document = get_window().document();
         let body = document.body().unwrap();
-        let count_n = count.max(1);
-        let iterations_n = iterations.max(1);
 
-        // getElementById/getElementsByClassName only search the live
-        // document tree, so (unlike the other demos) this benchmark's
-        // elements have to actually be attached; hide the container instead
-        // of leaving it detached.
+        // Generate N elements to query for
         let container = document.create_element("div");
-        container.set_attribute("style", "display:none");
-        let ids: Vec<String> = (0..count_n).map(|i| format!("item-{i}")).collect();
+        container.set_attribute("style", "display: none");
+        let ids: Vec<String> = (0..num_elements).map(|i| format!("item-{i}")).collect();
         for id in &ids {
             let item = document.create_element("div");
             item.set_attribute("id", id);
-            item.set_attribute("class", "item");
+            item.set_attribute("class", "rust-item");
             container.append_child(&item);
         }
         body.append_child(&container);
 
-        let total = count_n as f64 * iterations_n as f64;
-
-        // Same fixed set of elements looked up two ways: one
-        // `get-element-by-id` host call per element, versus one
-        // `get-elements-by-class-name` host call per iteration that returns
-        // every matching element at once.
+        let num_individual_lookups = num_elements as f64 * iterations as f64;
         let individual_start = now();
-        for _ in 0..iterations_n {
+        for _ in 0..iterations {
             for id in &ids {
                 let _ = document.get_element_by_id(id);
             }
@@ -97,20 +94,19 @@ impl Guest for Component {
         let individual_ms = now() - individual_start;
 
         let bulk_start = now();
-        for _ in 0..iterations_n {
-            let _ = document.get_elements_by_class_name("item");
+        for _ in 0..iterations {
+            let _ = document.get_elements_by_class_name("rust-item");
         }
         let bulk_ms = now() - bulk_start;
 
-        let individual_ns = individual_ms * 1_000_000.0 / total;
-        let bulk_ns = bulk_ms * 1_000_000.0 / total;
+        let us_per_individual = individual_ms * 1_000.0 / num_individual_lookups;
 
         let heading = document.create_element("h2");
         heading.text_content("Wasm component (Rust)");
 
         let table = document.create_element("table");
         let header = document.create_element("tr");
-        for label in ["approach", "total ms", "ns/element"] {
+        for label in ["approach", "iterations", "total ms", "µs/element"] {
             let th = document.create_element("th");
             th.text_content(label);
             header.append_child(&th);
@@ -120,16 +116,18 @@ impl Guest for Component {
         append_row(
             &document,
             &table,
-            "individual (get-element-by-id x N)",
-            &format!("{individual_ms:.2}"),
-            &format!("{individual_ns:.1}"),
+            "individual (getElementById)",
+            &format!("{iterations}"),
+            &format!("{individual_ms:.3}"),
+            &format!("{us_per_individual:.3}"),
         );
         append_row(
             &document,
             &table,
-            "bulk (get-elements-by-class-name)",
-            &format!("{bulk_ms:.2}"),
-            &format!("{bulk_ns:.1}"),
+            "bulk (getElementsByClassName)",
+            &format!("{iterations}"),
+            &format!("{bulk_ms:.3}"),
+            "n/a",
         );
 
         body.append_child(&heading);
