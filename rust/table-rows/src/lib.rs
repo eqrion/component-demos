@@ -77,14 +77,13 @@ impl Guest for Component {
     // as a fixed script rather than in response to real interaction.
     fn run(row_count: u32) {
         let document = get_window().document();
+        let body = document.body().unwrap();
         let count = row_count.max(1);
 
         let table_el = create(&document, "table");
         let tbody = create(&document, "tbody");
         append_child(&table_el, &tbody);
-        if let Some(body) = document.body() {
-            body.append_child(&table_el);
-        }
+        body.append_child(&table_el);
 
         let create_start = now();
         let mut rows = Vec::with_capacity(count as usize);
@@ -115,7 +114,7 @@ impl Guest for Component {
         let clear_ms = now() - clear_start;
 
         let heading = create(&document, "h2");
-        heading.text_content("Rust component (wasm)");
+        heading.text_content("Wasm component (Rust)");
 
         let report = create(&document, "table");
         let header = create(&document, "tr");
@@ -148,10 +147,8 @@ impl Guest for Component {
             &format!("{:.1}", clear_ms * 1_000_000.0 / count as f64),
         );
 
-        if let Some(body) = document.body() {
-            body.append_child(&heading);
-            body.append_child(&report);
-        }
+        body.append_child(&heading);
+        body.append_child(&report);
     }
 }
 

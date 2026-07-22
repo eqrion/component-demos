@@ -128,6 +128,7 @@ impl Guest for Component {
         body.append_child(&heading);
         body.append_child(&canvas);
         body.append_child(&table);
+    }
 }
 
 export!(Component);

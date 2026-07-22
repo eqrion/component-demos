@@ -77,6 +77,7 @@ fn build_elements(document: &Document, count: u32) -> Vec<Element> {
 impl Guest for Component {
     fn run(elements: u32, frames: u32) {
         let document = get_window().document();
+        let body = document.body().unwrap();
         let elements_n = elements.max(1);
         let frames_n = frames.max(1);
         let total_writes = elements_n as f64 * frames_n as f64 * ATTRS.len() as f64;
@@ -114,7 +115,7 @@ impl Guest for Component {
         let batched_ns = batched_ms * 1_000_000.0 / total_writes;
 
         let heading = create(&document, "h2");
-        heading.text_content("Rust component (wasm)");
+        heading.text_content("Wasm component (Rust)");
 
         let table = create(&document, "table");
         let header = create(&document, "tr");
@@ -140,10 +141,8 @@ impl Guest for Component {
             &format!("{batched_ns:.1}"),
         );
 
-        if let Some(body) = document.body() {
-            body.append_child(&heading);
-            body.append_child(&table);
-        }
+        body.append_child(&heading);
+        body.append_child(&table);
     }
 }
 

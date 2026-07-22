@@ -76,6 +76,7 @@ fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_pe
 impl Guest for Component {
     fn run(count: u32, iterations: u32) {
         let document = get_window().document();
+        let body = document.body().unwrap();
         let count_n = count.max(1);
         let iterations_n = iterations.max(1);
 
@@ -92,9 +93,7 @@ impl Guest for Component {
             set_attr(&item, "class", "item");
             append_child(&container, &item);
         }
-        if let Some(body) = document.body() {
-            body.append_child(&container);
-        }
+        body.append_child(&container);
 
         let total = count_n as f64 * iterations_n as f64;
 
@@ -120,7 +119,7 @@ impl Guest for Component {
         let bulk_ns = bulk_ms * 1_000_000.0 / total;
 
         let heading = create(&document, "h2");
-        heading.text_content("Rust component (wasm)");
+        heading.text_content("Wasm component (Rust)");
 
         let table = create(&document, "table");
         let header = create(&document, "tr");
@@ -146,10 +145,8 @@ impl Guest for Component {
             &format!("{bulk_ns:.1}"),
         );
 
-        if let Some(body) = document.body() {
-            body.append_child(&heading);
-            body.append_child(&table);
-        }
+        body.append_child(&heading);
+        body.append_child(&table);
     }
 }
 

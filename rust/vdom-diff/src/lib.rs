@@ -169,12 +169,11 @@ fn lis_mask(values: &[i64]) -> Vec<bool> {
 impl Guest for Component {
     fn run(row_count: u32) {
         let document = get_window().document();
+        let body = document.body().unwrap();
         let count = row_count.max(1);
 
         let container = create(&document, "ul");
-        if let Some(body) = document.body() {
-            body.append_child(&container);
-        }
+        body.append_child(&container);
 
         let rows: Vec<Row> = (0..count)
             .map(|key| {
@@ -280,7 +279,7 @@ impl Guest for Component {
         };
 
         let heading = create(&document, "h2");
-        heading.text_content("Rust component (wasm)");
+        heading.text_content("Wasm component (Rust)");
 
         let table = create(&document, "table");
         append_row(&document, &table, "old rows", &count.to_string());
@@ -292,10 +291,8 @@ impl Guest for Component {
         append_row(&document, &table, "total", &format!("{diff_ms:.2} ms"));
         append_row(&document, &table, "ns/op", &format!("{ns_per_op:.1}"));
 
-        if let Some(body) = document.body() {
-            body.append_child(&heading);
-            body.append_child(&table);
-        }
+        body.append_child(&heading);
+        body.append_child(&table);
     }
 }
 

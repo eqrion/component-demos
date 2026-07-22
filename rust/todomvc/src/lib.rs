@@ -133,6 +133,7 @@ fn build_filter(document: &Document, label: &str, href: &str, selected: bool) ->
 impl Guest for Component {
     fn run() {
         let document = get_window().document();
+        let body = document.body().unwrap();
 
         let root = create(&document, "section");
         set_class(&root, "todoapp");
@@ -213,9 +214,7 @@ impl Guest for Component {
         set_text(&clear_completed, "Clear completed");
         append_child(&footer, &clear_completed);
 
-        if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&root));
-        }
+        body.append_child(&element_as_node(&root));
     }
 }
 

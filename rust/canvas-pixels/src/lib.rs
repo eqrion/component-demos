@@ -96,6 +96,7 @@ impl Guest for Component {
     // resource handles (dom-query) the other demos move.
     fn run(size: u32, min_ms: u32) {
         let document = get_window().document();
+        let body = document.body().unwrap();
         let size_n = size.max(1);
         let min_ms = min_ms.max(1) as f64;
         let dim = size_n as f64;
@@ -127,7 +128,7 @@ impl Guest for Component {
         let put_mb_s = (byte_len as f64 * put_reps as f64) / (put_ms * 1_000.0);
 
         let heading = create(&document, "h2");
-        heading.text_content("Rust component (wasm)");
+        heading.text_content("Wasm component (Rust)");
 
         let table = create(&document, "table");
         append_row(
@@ -164,11 +165,9 @@ impl Guest for Component {
             ],
         );
 
-        if let Some(body) = document.body() {
-            body.append_child(&heading);
-            body.append_child(&canvas);
-            body.append_child(&table);
-        }
+        body.append_child(&heading);
+        body.append_child(&canvas);
+        body.append_child(&table);
     }
 }
 
