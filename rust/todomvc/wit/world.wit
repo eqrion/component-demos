@@ -8,7 +8,7 @@ world todomvc {
   }
   resource element {
     append-child: func(node: borrow<node>) -> node;
-    set-attribute: func(qualified-name: string, value: trusted-type-or-string);
+    set-attribute: func(qualified-name: string, value: string);
     text-content: func(value: string);
   }
   resource html-element {
@@ -17,22 +17,6 @@ world todomvc {
   resource node {
   }
   resource text {
-  }
-  resource trusted-html {
-  }
-  variant trusted-html-or-trusted-script-or-trusted-script-url {
-    trusted-html(trusted-html),
-    trusted-script(trusted-script),
-    trusted-script-url(trusted-script-url),
-  }
-  resource trusted-script {
-  }
-  resource trusted-script-url {
-  }
-  type trusted-type = trusted-html-or-trusted-script-or-trusted-script-url;
-  variant trusted-type-or-string {
-    trusted-type(trusted-type),
-    %string(string),
   }
   resource window {
     document: func() -> document;

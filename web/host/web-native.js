@@ -5,9 +5,6 @@ export let Element = globalThis.Element;
 export let HtmlElement = globalThis.HTMLElement;
 export let Node = globalThis.Node;
 export let Text = globalThis.Text;
-export let TrustedHtml = globalThis.TrustedHtml;
-export let TrustedScript = globalThis.TrustedScript;
-export let TrustedScriptUrl = globalThis.TrustedScriptUrl;
 export let Window = globalThis.Window;
 
 // Object.defineProperty(Window.prototype, "document", Object.getOwnPropertyDescriptor(window, "document"));

@@ -53,7 +53,7 @@ struct Component;
 const MAX_REPS: u64 = 1 << 20;
 
 fn set_attr(element: &Element, name: &str, value: &str) {
-    element.set_attribute(name, TrustedTypeOrString::String(value.to_string()));
+    element.set_attribute(name, value);
 }
 
 fn append_row(document: &Document, table: &Element, cell_tag: &str, cells: &[String]) {

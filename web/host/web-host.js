@@ -80,8 +80,7 @@ class Element extends Node {
     this.raw.remove();
   }
   setAttribute(qualifiedName, value) {
-    const raw = value.tag === "string" ? value.val : String(value.val);
-    this.raw.setAttribute(qualifiedName, raw);
+    this.raw.setAttribute(qualifiedName, value);
   }
 }
 
@@ -118,10 +117,6 @@ class Window {
   }
 }
 
-class TrustedHtml {}
-class TrustedScript {}
-class TrustedScriptUrl {}
-
 export {
   CanvasRenderingContext2d,
   Document,
@@ -129,9 +124,6 @@ export {
   Element,
   HtmlElement,
   Text,
-  TrustedHtml,
-  TrustedScript,
-  TrustedScriptUrl,
   Window,
 };
 

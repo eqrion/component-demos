@@ -2,10 +2,9 @@
 extern crate alloc;
 extern crate core;
 
-use crate::_rt::String;
-use crate::_rt::Vec;
 use alloc::format;
-use alloc::string::ToString;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 #[panic_handler]
 fn panic_handler(_info: &core::panic::PanicInfo) -> ! {
@@ -52,7 +51,7 @@ wit_bindgen::generate!({
 struct Component;
 
 fn set_attr(element: &Element, name: &str, value: &str) {
-    element.set_attribute(name, TrustedTypeOrString::String(value.to_string()));
+    element.set_attribute(name, value);
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_element: &str) {

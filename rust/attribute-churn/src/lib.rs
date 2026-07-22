@@ -78,7 +78,7 @@ impl Guest for Component {
         for i in 0..iters {
             for el in &elements {
                 for (j, name) in ATTRS.iter().enumerate() {
-                    el.set_attribute(name, TrustedTypeOrString::String(format!("{i}-{j}")));
+                    el.set_attribute(name, &format!("{i}-{j}"));
                 }
             }
         }

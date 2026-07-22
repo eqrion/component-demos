@@ -64,7 +64,7 @@ fn rand(state: &mut u32) -> f64 {
 }
 
 fn set_attr(element: &Element, name: &str, value: &str) {
-    element.set_attribute(name, TrustedTypeOrString::String(value.to_string()));
+    element.set_attribute(name, value);
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {

@@ -69,11 +69,11 @@ fn create(document: &Document, tag: &str) -> Element {
 }
 
 fn set_class(element: &Element, class: &str) {
-    element.set_attribute("class", TrustedTypeOrString::String(class.to_string()));
+    element.set_attribute("class", class);
 }
 
 fn set_attr(element: &Element, name: &str, value: &str) {
-    element.set_attribute(name, TrustedTypeOrString::String(value.to_string()));
+    element.set_attribute(name, value);
 }
 
 fn append_child(parent: &Element, child: &Element) {
