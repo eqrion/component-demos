@@ -49,53 +49,11 @@ wit_bindgen::generate!({
 
 struct Component;
 
-const FANOUT: u32 = 8;
-
-fn create(document: &Document, tag: &str) -> Element {
-    document.create_element(tag)
-}
-
-fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(child);
-}
-
-fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
-    let row = create(document, "tr");
-    let th = create(document, "th");
-    th.text_content(label);
-    append_child(&row, &th);
-    let td = create(document, "td");
-    td.text_content(value);
-    append_child(&row, &td);
-    append_child(table, &row);
-}
-
-fn count_for_depth(fanout: u64, depth: u32) -> u64 {
-    let mut total = 0u64;
-    let mut term = 1u64;
-    for _ in 0..=depth {
-        total += term;
-        term *= fanout;
-    }
-    total
-}
-
-// Largest depth whose complete fanout-ary tree has at most `node_count` nodes.
-fn choose_depth(node_count: u32) -> u32 {
-    let mut depth = 0u32;
-    while count_for_depth(FANOUT as u64, depth + 1) <= node_count as u64 {
-        depth += 1;
-    }
-    depth
-}
-
-// Built detached from `document` so the benchmark measures wrapper/boundary
-// cost, not layout or reflow.
-fn build_tree(document: &Document, depth: u32) -> Element {
-    let el = create(document, "div");
+fn build_tree(document: &Document, depth: i32, num_children: i32) -> Element {
+    let el = document.create_element("div");
     if depth > 0 {
-        for _ in 0..FANOUT {
-            append_child(&el, &build_tree(document, depth - 1));
+        for _ in 0..num_children {
+            el.append_child(&build_tree(document, depth - 1, num_children));
         }
     }
     el
@@ -112,36 +70,37 @@ fn traverse(node: Option<&Element>) -> u32 {
     }
 }
 
+fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
+    let row = document.create_element("tr");
+    let th = document.create_element("th");
+    th.text_content(label);
+    row.append_child(&th);
+    let td = document.create_element("td");
+    td.text_content(value);
+    row.append_child(&td);
+    table.append_child(&row);
+}
+
 impl Guest for Component {
-    fn run(node_count: u32, iterations: u32) {
+    fn run(depth: i32, num_children: i32) {
         let document = get_window().document();
-        let depth = choose_depth(node_count.max(1));
-        let iters = iterations.max(1) as u64;
+        let body = document.body().unwrap();
 
         let build_start = now();
-        let root = build_tree(&document, depth);
+        let root = build_tree(&document, depth, num_children);
         let build_ms = now() - build_start;
 
-        let mut total_counted: u64 = 0;
         let traverse_start = now();
-        for _ in 0..iters {
-            total_counted += traverse(Some(&root)) as u64;
-        }
+        let node_total = traverse(Some(&root)) as u64;
         let traverse_ms = now() - traverse_start;
 
-        let node_total = total_counted / iters;
-        let ns_per_node = if node_total > 0 {
-            (traverse_ms.max(0.001) * 1_000_000.0) / (iters as f64 * node_total as f64)
-        } else {
-            0.0
-        };
+        let us_per_node = (traverse_ms * 1_000.0) / node_total as f64;
 
-        let heading = create(&document, "h2");
-        heading.text_content("Rust component (wasm)");
+        let heading = document.create_element("h2");
+        heading.text_content("Wasm component (Rust)");
 
-        let table = create(&document, "table");
+        let table = document.create_element("table");
         append_row(&document, &table, "nodes", &node_total.to_string());
-        append_row(&document, &table, "iterations", &iters.to_string());
         append_row(&document, &table, "build", &format!("{build_ms:.2} ms"));
         append_row(
             &document,
@@ -153,13 +112,11 @@ impl Guest for Component {
             &document,
             &table,
             "traverse (per node)",
-            &format!("{ns_per_node:.1} ns"),
+            &format!("{us_per_node:.3} µs"),
         );
 
-        if let Some(body) = document.body() {
-            body.append_child(&heading);
-            body.append_child(&table);
-        }
+        body.append_child(&heading);
+        body.append_child(&table);
     }
 }
 

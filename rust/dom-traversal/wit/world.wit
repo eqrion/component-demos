@@ -21,5 +21,5 @@ world dom-traversal {
   import get-window: func() -> window;
   import now: func() -> f64;
 
-  export run: func(node-count: u32, iterations: u32);
+  export run: func(depth: s32, node-count: s32);
 }

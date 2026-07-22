@@ -7,41 +7,26 @@ const { run } = await load({
 });
 
 const params = new URLSearchParams(window.location.search);
-const nodeCount = Number(params.get("nodes") ?? 50000);
-const iterations = Number(params.get("iters") ?? 10);
+const depth = Number(params.get("depth") ?? 8);
+const numChildren = Number(params.get("num_children") ?? 4);
+window.depth.textContent = `${depth}`;
+window.numChildren.textContent = `${numChildren}`;
+await new Promise(res => requestAnimationFrame(res)); // redraw page
 
-const FANOUT = 8;
-
-function countForDepth(fanout, depth) {
-  let total = 0;
-  let term = 1;
-  for (let i = 0; i <= depth; i++) {
-    total += term;
-    term *= fanout;
-  }
-  return total;
-}
-
-function chooseDepth(nodeCount) {
-  let depth = 0;
-  while (countForDepth(FANOUT, depth + 1) <= nodeCount) {
-    depth++;
-  }
-  return depth;
-}
-
-function buildTree(document, depth) {
+function buildTree(document, depth, numChildren) {
   const el = document.createElement("div");
   if (depth > 0) {
-    for (let i = 0; i < FANOUT; i++) {
-      el.appendChild(buildTree(document, depth - 1));
+    for (let i = 0; i < numChildren; i++) {
+      el.appendChild(buildTree(document, depth - 1, numChildren));
     }
   }
   return el;
 }
 
 function traverse(node) {
-  if (!node) return 0;
+  if (!node) {
+    return 0;
+  }
   return 1 + traverse(node.firstChild) + traverse(node.nextSibling);
 }
 
@@ -64,32 +49,24 @@ function renderReport(title, rows) {
   document.body.appendChild(table);
 }
 
-function runRawJs(nodeCount, iterations) {
-  const depth = chooseDepth(Math.max(nodeCount, 1));
-  const iters = Math.max(iterations, 1);
-
+function runRawJs(depth, numChildren) {
   const buildStart = performance.now();
-  const root = buildTree(document, depth);
+  const root = buildTree(document, depth, numChildren);
   const buildMs = performance.now() - buildStart;
 
-  let total = 0;
   const traverseStart = performance.now();
-  for (let i = 0; i < iters; i++) {
-    total += traverse(root);
-  }
+  const nodeTotal = traverse(root);
   const traverseMs = performance.now() - traverseStart;
 
-  const nodeTotal = total / iters;
-  const nsPerNode = nodeTotal > 0 ? (Math.max(traverseMs, 0.001) * 1_000_000) / (iters * nodeTotal) : 0;
+  const usPerNode = (traverseMs * 1_000) / nodeTotal;
 
   renderReport("Raw JS", [
-    ["nodes", nodeTotal.toString()],
-    ["iterations", iters.toString()],
-    ["build", `${buildMs.toFixed(2)} ms`],
-    ["traverse (total)", `${traverseMs.toFixed(2)} ms`],
-    ["traverse (per node)", `${nsPerNode.toFixed(1)} ns`],
+    ["nodes", `${nodeTotal}`],
+    ["build", `${buildMs.toFixed(3)} ms`],
+    ["traverse (total)", `${traverseMs.toFixed(3)} ms`],
+    ["traverse (per node)", `${usPerNode.toFixed(3)} µs`],
   ]);
 }
 
-runRawJs(nodeCount, iterations);
-run(nodeCount, iterations);
+runRawJs(depth, numChildren);
+run(depth, numChildren);
