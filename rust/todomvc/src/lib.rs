@@ -19,7 +19,7 @@ unsafe extern "C" fn cabi_realloc(
     align: usize,
     new_len: usize,
 ) -> *mut u8 {
-    use alloc::alloc::{alloc, realloc, Layout};
+    use alloc::alloc::{Layout, alloc, realloc};
 
     unsafe {
         let ptr = if old_len == 0 {
@@ -54,8 +54,14 @@ struct Todo {
 }
 
 const TODOS: &[Todo] = &[
-    Todo { title: "Taste JavaScript", completed: true },
-    Todo { title: "Buy a unicorn", completed: false },
+    Todo {
+        title: "Taste JavaScript",
+        completed: true,
+    },
+    Todo {
+        title: "Buy a unicorn",
+        completed: false,
+    },
 ];
 
 fn create(document: &Document, tag: &str) -> Element {
@@ -75,7 +81,7 @@ fn append_child(parent: &Element, child: &Element) {
 }
 
 fn set_text(element: &Element, text: &str) {
-    element.set_text_content(text);
+    element.text_content(text);
 }
 
 fn append_text_node(document: &Document, parent: &Element, text: &str) {
@@ -178,14 +184,28 @@ impl Guest for Component {
         let strong = create(&document, "strong");
         set_text(&strong, &remaining.to_string());
         append_child(&count, &strong);
-        append_text_node(&document, &count, if remaining == 1 { " item left" } else { " items left" });
+        append_text_node(
+            &document,
+            &count,
+            if remaining == 1 {
+                " item left"
+            } else {
+                " items left"
+            },
+        );
         append_child(&footer, &count);
 
         let filters = create(&document, "ul");
         set_class(&filters, "filters");
         append_child(&filters, &build_filter(&document, "All", "#/", true));
-        append_child(&filters, &build_filter(&document, "Active", "#/active", false));
-        append_child(&filters, &build_filter(&document, "Completed", "#/completed", false));
+        append_child(
+            &filters,
+            &build_filter(&document, "Active", "#/active", false),
+        );
+        append_child(
+            &filters,
+            &build_filter(&document, "Completed", "#/completed", false),
+        );
         append_child(&footer, &filters);
 
         let clear_completed = create(&document, "button");

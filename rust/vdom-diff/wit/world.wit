@@ -9,7 +9,7 @@ world vdom-diff {
     append-child: func(node: borrow<node>) -> node;
     insert-before: func(node: borrow<node>, reference: borrow<node>) -> node;
     remove: func();
-    set-text-content: func(value: string);
+    text-content: func(value: string);
   }
   resource html-element {
     append-child: func(node: borrow<node>) -> node;

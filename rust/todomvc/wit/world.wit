@@ -9,7 +9,7 @@ world todomvc {
   resource element {
     append-child: func(node: borrow<node>) -> node;
     set-attribute: func(qualified-name: string, value: trusted-type-or-string);
-    set-text-content: func(value: string);
+    text-content: func(value: string);
   }
   resource html-element {
     append-child: func(node: borrow<node>) -> node;

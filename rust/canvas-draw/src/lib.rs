@@ -20,7 +20,7 @@ unsafe extern "C" fn cabi_realloc(
     align: usize,
     new_len: usize,
 ) -> *mut u8 {
-    use alloc::alloc::{alloc, realloc, Layout};
+    use alloc::alloc::{Layout, alloc, realloc};
 
     unsafe {
         let ptr = if old_len == 0 {
@@ -67,10 +67,10 @@ fn append_child(parent: &Element, child: &Element) {
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
     let row = create(document, "tr");
     let th = create(document, "th");
-    th.set_text_content(label);
+    th.text_content(label);
     append_child(&row, &th);
     let td = create(document, "td");
-    td.set_text_content(value);
+    td.text_content(value);
     append_child(&row, &td);
     append_child(table, &row);
 }
@@ -102,12 +102,17 @@ impl Guest for Component {
         let ns_per_call = ms * 1_000_000.0 / count as f64;
 
         let heading = create(&document, "h2");
-        heading.set_text_content("Rust component (wasm)");
+        heading.text_content("Rust component (wasm)");
 
         let table = create(&document, "table");
         append_row(&document, &table, "rects", &count.to_string());
         append_row(&document, &table, "total", &format!("{ms:.2} ms"));
-        append_row(&document, &table, "per call", &format!("{ns_per_call:.1} ns"));
+        append_row(
+            &document,
+            &table,
+            "per call",
+            &format!("{ns_per_call:.1} ns"),
+        );
 
         if let Some(body) = document.body() {
             body.append_child(&element_as_node(&heading));

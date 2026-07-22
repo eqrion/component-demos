@@ -5,6 +5,7 @@ web/dist/
 web/*/*/jco/
 web/*/*/native/
 **/src/bindings.rs
+.DS_Store
 
 # C / raw-toolchain intermediates
 build/

@@ -8,7 +8,7 @@ world table-rows {
   resource element {
     append-child: func(node: borrow<node>) -> node;
     remove: func();
-    set-text-content: func(value: string);
+    text-content: func(value: string);
   }
   resource html-element {
     append-child: func(node: borrow<node>) -> node;

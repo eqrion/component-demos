@@ -7,6 +7,7 @@ world string-marshalling {
   }
   resource element {
     append-child: func(node: borrow<node>) -> node;
+    // TODO: Decide how we actually want to distinguish between getters and setters
     text-content: func() -> string;
     set-text-content: func(value: string);
   }

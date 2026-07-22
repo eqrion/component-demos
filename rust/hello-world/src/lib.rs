@@ -17,7 +17,7 @@ unsafe extern "C" fn cabi_realloc(
     align: usize,
     new_len: usize,
 ) -> *mut u8 {
-    use alloc::alloc::{alloc, realloc, Layout};
+    use alloc::alloc::{Layout, alloc, realloc};
 
     unsafe {
         let ptr = if old_len == 0 {
@@ -49,6 +49,7 @@ struct Component;
 impl Guest for Component {
     fn run() {
         let document = get_window().document();
+        let body = document.body().unwrap();
 
         let heading = document.create_element("h1");
         heading
@@ -56,9 +57,7 @@ impl Guest for Component {
             .add(&["hello".into(), "from-wasm".into()]);
         heading.text_content("Hello from Wasm!");
 
-        if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&heading));
-        }
+        body.append_child(&element_as_node(&heading));
     }
 }
 

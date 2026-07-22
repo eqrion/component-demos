@@ -12,8 +12,12 @@ export class Node {
   nextSibling() {
     return this.raw.nextSibling ? new Node(this.raw.nextSibling) : undefined;
   }
-  textContent() {
-    return this.raw.textContent ?? "";
+  textContent(value) {
+    if (value === undefined) {
+      return this.raw.textContent;
+    } else {
+      this.raw.textContent = value;
+    }
   }
   setTextContent(value) {
     this.raw.textContent = value;

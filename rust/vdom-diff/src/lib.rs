@@ -23,7 +23,7 @@ unsafe extern "C" fn cabi_realloc(
     align: usize,
     new_len: usize,
 ) -> *mut u8 {
-    use alloc::alloc::{alloc, realloc, Layout};
+    use alloc::alloc::{Layout, alloc, realloc};
 
     unsafe {
         let ptr = if old_len == 0 {
@@ -91,10 +91,10 @@ fn insert_before(parent: &Element, child: &Element, reference: &Element) {
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
     let row = create(document, "tr");
     let th = create(document, "th");
-    th.set_text_content(label);
+    th.text_content(label);
     append_child(&row, &th);
     let td = create(document, "td");
-    td.set_text_content(value);
+    td.text_content(value);
     append_child(&row, &td);
     append_child(table, &row);
 }
@@ -119,7 +119,10 @@ fn build_new_keys(count: u32) -> Vec<u32> {
     let split = survivors.len() / 10;
     let (head, tail) = survivors.split_at(split);
     let fresh = count..(count + count / 10);
-    fresh.chain(tail.iter().copied()).chain(head.iter().copied()).collect()
+    fresh
+        .chain(tail.iter().copied())
+        .chain(head.iter().copied())
+        .collect()
 }
 
 // Longest increasing subsequence, by index: `mask[i]` is true when
@@ -177,9 +180,13 @@ impl Guest for Component {
             .map(|key| {
                 let element = create(&document, "li");
                 let label = format!("row {key}");
-                element.set_text_content(&label);
+                element.text_content(&label);
                 append_child(&container, &element);
-                Row { key, label, element }
+                Row {
+                    key,
+                    label,
+                    element,
+                }
             })
             .collect();
 
@@ -196,7 +203,8 @@ impl Guest for Component {
             .iter()
             .map(|k| old_index_of.get(k).map(|&i| i as i64).unwrap_or(-1))
             .collect();
-        let reused_indices: Vec<usize> = (0..new_keys.len()).filter(|&i| positions[i] >= 0).collect();
+        let reused_indices: Vec<usize> =
+            (0..new_keys.len()).filter(|&i| positions[i] >= 0).collect();
         let reused_positions: Vec<i64> = reused_indices.iter().map(|&i| positions[i]).collect();
         let lis = lis_mask(&reused_positions);
         let mut no_move = vec![false; new_keys.len()];
@@ -216,7 +224,7 @@ impl Guest for Component {
                 Some(&old_i) => {
                     let mut row = old_rows[old_i].take().unwrap();
                     if row.label != label {
-                        row.element.set_text_content(&label);
+                        row.element.text_content(&label);
                         row.label = label;
                         updates += 1;
                     }
@@ -224,9 +232,13 @@ impl Guest for Component {
                 }
                 None => {
                     let element = create(&document, "li");
-                    element.set_text_content(&label);
+                    element.text_content(&label);
                     inserts += 1;
-                    Row { key, label, element }
+                    Row {
+                        key,
+                        label,
+                        element,
+                    }
                 }
             };
             new_rows[i] = Some(row);
@@ -268,7 +280,7 @@ impl Guest for Component {
         };
 
         let heading = create(&document, "h2");
-        heading.set_text_content("Rust component (wasm)");
+        heading.text_content("Rust component (wasm)");
 
         let table = create(&document, "table");
         append_row(&document, &table, "old rows", &count.to_string());

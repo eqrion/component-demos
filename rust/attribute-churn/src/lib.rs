@@ -21,7 +21,7 @@ unsafe extern "C" fn cabi_realloc(
     align: usize,
     new_len: usize,
 ) -> *mut u8 {
-    use alloc::alloc::{alloc, realloc, Layout};
+    use alloc::alloc::{Layout, alloc, realloc};
 
     unsafe {
         let ptr = if old_len == 0 {
@@ -64,7 +64,7 @@ fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_pe
     let row = create(document, "tr");
     for value in [label, ms, ns_per_write] {
         let td = create(document, "td");
-        td.set_text_content(value);
+        td.text_content(value);
         append_child(&row, &td);
     }
     append_child(table, &row);
@@ -114,13 +114,13 @@ impl Guest for Component {
         let batched_ns = batched_ms * 1_000_000.0 / total_writes;
 
         let heading = create(&document, "h2");
-        heading.set_text_content("Rust component (wasm)");
+        heading.text_content("Rust component (wasm)");
 
         let table = create(&document, "table");
         let header = create(&document, "tr");
         for label in ["approach", "total ms", "ns/write"] {
             let th = create(&document, "th");
-            th.set_text_content(label);
+            th.text_content(label);
             append_child(&header, &th);
         }
         append_child(&table, &header);

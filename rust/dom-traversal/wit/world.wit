@@ -7,7 +7,7 @@ world dom-traversal {
   }
   resource element {
     append-child: func(node: borrow<node>) -> node;
-    set-text-content: func(value: string);
+    text-content: func(value: string);
   }
   resource html-element {
     append-child: func(node: borrow<node>) -> node;
