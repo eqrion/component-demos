@@ -37,5 +37,5 @@ world attribute-churn {
   import get-window: func() -> window;
   import now: func() -> f64;
 
-  export run: func(elements: u32, frames: u32);
+  export run: func(elements: u32, iters: u32);
 }

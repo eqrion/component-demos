@@ -83,11 +83,6 @@ class Element extends Node {
     const raw = value.tag === "string" ? value.val : String(value.val);
     this.raw.setAttribute(qualifiedName, raw);
   }
-  setAttributes(pairs) {
-    for (const [name, value] of pairs) {
-      this.raw.setAttribute(name, value);
-    }
-  }
 }
 
 class HtmlElement extends Element {}

@@ -8,7 +8,10 @@ const { run } = await load({
 
 const params = new URLSearchParams(window.location.search);
 const elementCount = Number(params.get("elements") ?? 2000);
-const frames = Number(params.get("frames") ?? 20);
+const iters = Number(params.get("iters") ?? 20);
+window.numElements.textContent = `${elementCount}`;
+window.iters.textContent = `${iters}`;
+await new Promise(res => setTimeout(res, 0)); // redraw page
 
 const ATTRS = ["data-x", "data-y", "class", "title"];
 
@@ -18,41 +21,40 @@ function renderReport(title, rows) {
   document.body.appendChild(heading);
 
   const table = document.createElement("table");
-  const header = document.createElement("tr");
-  for (const label of ["approach", "total ms", "ns/write"]) {
+  for (const [label, value] of rows) {
+    const row = document.createElement("tr");
     const th = document.createElement("th");
     th.textContent = label;
-    header.appendChild(th);
-  }
-  table.appendChild(header);
-
-  for (const cells of rows) {
-    const row = document.createElement("tr");
-    for (const cell of cells) {
-      const td = document.createElement("td");
-      td.textContent = cell;
-      row.appendChild(td);
-    }
+    row.appendChild(th);
+    const td = document.createElement("td");
+    td.textContent = value;
+    row.appendChild(td);
     table.appendChild(row);
   }
   document.body.appendChild(table);
 }
 
-function runRawJs(elementCount, frames) {
+function runRawJs(elementCount, iters) {
   const elements = Array.from({ length: elementCount }, () => document.createElement("div"));
-  const totalWrites = elementCount * frames * ATTRS.length;
+  const totalWrites = elementCount * iters * ATTRS.length;
 
   const start = performance.now();
-  for (let frame = 0; frame < frames; frame++) {
+  for (let i = 0; i < iters; i++) {
     for (const el of elements) {
-      ATTRS.forEach((name, i) => el.setAttribute(name, `${frame}-${i}`));
+      for (const [j, name] of ATTRS.entries()) {
+        el.setAttribute(name, `${i}-${j}`);
+      }
     }
   }
   const ms = performance.now() - start;
-  const nsPerWrite = (ms * 1_000_000) / totalWrites;
+  const usPerWrite = (ms * 1_000) / totalWrites;
 
-  renderReport("Raw JS", [["individual (1 call/attribute)", ms.toFixed(2), nsPerWrite.toFixed(1)]]);
+  renderReport("Raw JS", [
+    ["num calls", `${totalWrites}`],
+    ["total time", `${ms.toFixed(3)} ms`],
+    ["per setAttribute()", `${usPerWrite.toFixed(3)} µs`],
+  ]);
 }
 
-runRawJs(elementCount, frames);
-run(elementCount, frames);
+runRawJs(elementCount, iters);
+run(elementCount, iters);
