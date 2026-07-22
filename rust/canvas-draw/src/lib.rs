@@ -63,10 +63,6 @@ fn rand(state: &mut u32) -> f64 {
     x as f64 / (u32::MAX as f64 + 1.0)
 }
 
-fn set_attr(element: &Element, name: &str, value: &str) {
-    element.set_attribute(name, value);
-}
-
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
     let row = document.create_element("tr");
     let th = document.create_element("th");
@@ -89,8 +85,8 @@ impl Guest for Component {
         let body = document.body().unwrap();
 
         let canvas = document.create_element("canvas");
-        set_attr(&canvas, "width", &CANVAS_SIZE.to_string());
-        set_attr(&canvas, "height", &CANVAS_SIZE.to_string());
+        canvas.set_attribute("width", &CANVAS_SIZE.to_string());
+        canvas.set_attribute("height", &CANVAS_SIZE.to_string());
         let ctx = canvas.get_context2d();
         ctx.fill_style("steelblue");
 

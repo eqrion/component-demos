@@ -50,10 +50,6 @@ wit_bindgen::generate!({
 
 struct Component;
 
-fn set_attr(element: &Element, name: &str, value: &str) {
-    element.set_attribute(name, value);
-}
-
 fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_element: &str) {
     let row = document.create_element("tr");
     for value in [label, ms, ns_per_element] {
@@ -76,12 +72,12 @@ impl Guest for Component {
         // elements have to actually be attached; hide the container instead
         // of leaving it detached.
         let container = document.create_element("div");
-        set_attr(&container, "style", "display:none");
+        container.set_attribute("style", "display:none");
         let ids: Vec<String> = (0..count_n).map(|i| format!("item-{i}")).collect();
         for id in &ids {
             let item = document.create_element("div");
-            set_attr(&item, "id", id);
-            set_attr(&item, "class", "item");
+            item.set_attribute("id", id);
+            item.set_attribute("class", "item");
             container.append_child(&item);
         }
         body.append_child(&container);

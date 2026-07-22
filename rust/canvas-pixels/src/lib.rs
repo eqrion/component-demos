@@ -52,10 +52,6 @@ struct Component;
 
 const MAX_REPS: u64 = 1 << 20;
 
-fn set_attr(element: &Element, name: &str, value: &str) {
-    element.set_attribute(name, value);
-}
-
 fn append_row(document: &Document, table: &Element, cell_tag: &str, cells: &[String]) {
     let row = document.create_element("tr");
     for cell in cells {
@@ -95,8 +91,8 @@ impl Guest for Component {
         let byte_len = size_n as usize * size_n as usize * 4;
 
         let canvas = document.create_element("canvas");
-        set_attr(&canvas, "width", &size_n.to_string());
-        set_attr(&canvas, "height", &size_n.to_string());
+        canvas.set_attribute("width", &size_n.to_string());
+        canvas.set_attribute("height", &size_n.to_string());
         let ctx = canvas.get_context2d();
         ctx.set_fill_style("steelblue");
         ctx.fill_rect(0.0, 0.0, dim, dim);
