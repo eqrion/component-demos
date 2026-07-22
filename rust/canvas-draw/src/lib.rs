@@ -72,7 +72,7 @@ fn set_attr(element: &Element, name: &str, value: &str) {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&element_as_node(child));
+    parent.append_child(child);
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
@@ -125,10 +125,9 @@ impl Guest for Component {
             &format!("{us_per_call:.3} µs"),
         );
 
-        body.append_child(&element_as_node(&heading));
-        body.append_child(&element_as_node(&canvas));
-        body.append_child(&element_as_node(&table));
-    }
+        body.append_child(&heading);
+        body.append_child(&canvas);
+        body.append_child(&table);
 }
 
 export!(Component);

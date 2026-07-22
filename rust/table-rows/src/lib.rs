@@ -54,7 +54,7 @@ fn create(document: &Document, tag: &str) -> Element {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&element_as_node(child));
+    parent.append_child(child);
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_row: &str) {
@@ -83,7 +83,7 @@ impl Guest for Component {
         let tbody = create(&document, "tbody");
         append_child(&table_el, &tbody);
         if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&table_el));
+            body.append_child(&table_el);
         }
 
         let create_start = now();
@@ -149,8 +149,8 @@ impl Guest for Component {
         );
 
         if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&heading));
-            body.append_child(&element_as_node(&report));
+            body.append_child(&heading);
+            body.append_child(&report);
         }
     }
 }

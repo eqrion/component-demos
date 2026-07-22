@@ -81,11 +81,11 @@ fn create(document: &Document, tag: &str) -> Element {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&element_as_node(child));
+    parent.append_child(child);
 }
 
 fn insert_before(parent: &Element, child: &Element, reference: &Element) {
-    parent.insert_before(&element_as_node(child), &element_as_node(reference));
+    parent.insert_before(child, reference);
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
@@ -173,7 +173,7 @@ impl Guest for Component {
 
         let container = create(&document, "ul");
         if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&container));
+            body.append_child(&container);
         }
 
         let rows: Vec<Row> = (0..count)
@@ -293,8 +293,8 @@ impl Guest for Component {
         append_row(&document, &table, "ns/op", &format!("{ns_per_op:.1}"));
 
         if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&heading));
-            body.append_child(&element_as_node(&table));
+            body.append_child(&heading);
+            body.append_child(&table);
         }
     }
 }

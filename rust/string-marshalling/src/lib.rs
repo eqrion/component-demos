@@ -57,9 +57,9 @@ fn append_row(document: &Document, table: &Element, cell_tag: &str, cells: &[Str
     for cell in cells {
         let td = document.create_element(cell_tag);
         td.set_text_content(cell);
-        row.append_child(&element_as_node(&td));
+        row.append_child(&td);
     }
-    table.append_child(&element_as_node(&row));
+    table.append_child(&row);
 }
 
 // Autoranging timer: doubles the rep count until at least `min_ms` has
@@ -138,8 +138,8 @@ impl Guest for Component {
             );
         }
 
-        body.append_child(&element_as_node(&heading));
-        body.append_child(&element_as_node(&table));
+        body.append_child(&heading);
+        body.append_child(&table);
     }
 }
 

@@ -56,7 +56,7 @@ fn create(document: &Document, tag: &str) -> Element {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&element_as_node(child));
+    parent.append_child(child);
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
@@ -101,13 +101,13 @@ fn build_tree(document: &Document, depth: u32) -> Element {
     el
 }
 
-fn traverse(node: Option<Node>) -> u32 {
+fn traverse(node: Option<&Element>) -> u32 {
     match node {
         None => 0,
         Some(n) => {
             let first = n.first_child();
             let sibling = n.next_sibling();
-            1 + traverse(first) + traverse(sibling)
+            1 + traverse(first.as_ref()) + traverse(sibling.as_ref())
         }
     }
 }
@@ -125,7 +125,7 @@ impl Guest for Component {
         let mut total_counted: u64 = 0;
         let traverse_start = now();
         for _ in 0..iters {
-            total_counted += traverse(Some(element_as_node(&root))) as u64;
+            total_counted += traverse(Some(&root)) as u64;
         }
         let traverse_ms = now() - traverse_start;
 
@@ -157,8 +157,8 @@ impl Guest for Component {
         );
 
         if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&heading));
-            body.append_child(&element_as_node(&table));
+            body.append_child(&heading);
+            body.append_child(&table);
         }
     }
 }

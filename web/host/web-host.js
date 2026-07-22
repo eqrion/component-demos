@@ -7,10 +7,10 @@ export class Node {
     this.raw = raw;
   }
   firstChild() {
-    return this.raw.firstChild ? new Node(this.raw.firstChild) : undefined;
+    return wrapNode(this.raw.firstChild);
   }
   nextSibling() {
-    return this.raw.nextSibling ? new Node(this.raw.nextSibling) : undefined;
+    return wrapNode(this.raw.nextSibling);
   }
   textContent(value) {
     if (value === undefined) {
@@ -25,6 +25,15 @@ export class Node {
 }
 
 class Text extends Node {}
+
+// The host exposes `element`/`node`/`text` as distinct wit resource types,
+// but a raw DOM node returned from e.g. firstChild/appendChild is only ever
+// one of these underneath. Wrap it as whichever wit resource the caller
+// declared, so jco's `instanceof` check on the return value succeeds.
+function wrapNode(raw) {
+  if (!raw) return undefined;
+  return raw.nodeType === 3 ? new Text(raw) : new Element(raw);
+}
 
 class CanvasRenderingContext2d {
   constructor(raw) {
@@ -56,7 +65,7 @@ class DomTokenList {
 
 class Element extends Node {
   appendChild(node) {
-    return new Node(this.raw.appendChild(node.raw));
+    return wrapNode(this.raw.appendChild(node.raw));
   }
   classList() {
     return new DomTokenList(this.raw.classList);
@@ -65,7 +74,7 @@ class Element extends Node {
     return new CanvasRenderingContext2d(this.raw.getContext("2d"));
   }
   insertBefore(node, reference) {
-    return new Node(this.raw.insertBefore(node.raw, reference.raw));
+    return wrapNode(this.raw.insertBefore(node.raw, reference.raw));
   }
   remove() {
     this.raw.remove();

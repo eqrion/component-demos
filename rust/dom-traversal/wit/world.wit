@@ -6,21 +6,18 @@ world dom-traversal {
     create-element: func(local-name: string) -> element;
   }
   resource element {
-    append-child: func(node: borrow<node>) -> node;
+    append-child: func(child: borrow<element>) -> element;
+    first-child: func() -> option<element>;
+    next-sibling: func() -> option<element>;
     text-content: func(value: string);
   }
   resource html-element {
-    append-child: func(node: borrow<node>) -> node;
-  }
-  resource node {
-    first-child: func() -> option<node>;
-    next-sibling: func() -> option<node>;
+    append-child: func(child: borrow<element>) -> element;
   }
   resource window {
     document: func() -> document;
   }
 
-  import element-as-node: func(v: borrow<element>) -> node;
   import get-window: func() -> window;
   import now: func() -> f64;
 

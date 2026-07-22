@@ -6,20 +6,17 @@ world table-rows {
     create-element: func(local-name: string) -> element;
   }
   resource element {
-    append-child: func(node: borrow<node>) -> node;
+    append-child: func(child: borrow<element>) -> element;
     remove: func();
     text-content: func(value: string);
   }
   resource html-element {
-    append-child: func(node: borrow<node>) -> node;
-  }
-  resource node {
+    append-child: func(child: borrow<element>) -> element;
   }
   resource window {
     document: func() -> document;
   }
 
-  import element-as-node: func(v: borrow<element>) -> node;
   import get-window: func() -> window;
   import now: func() -> f64;
 

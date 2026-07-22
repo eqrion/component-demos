@@ -12,15 +12,13 @@ world canvas-pixels {
     set-fill-style: func(value: string);
   }
   resource element {
-    append-child: func(node: borrow<node>) -> node;
+    append-child: func(child: borrow<element>) -> element;
     get-context2d: func() -> canvas-rendering-context2d;
     set-attribute: func(qualified-name: string, value: trusted-type-or-string);
     text-content: func(value: string);
   }
   resource html-element {
-    append-child: func(node: borrow<node>) -> node;
-  }
-  resource node {
+    append-child: func(child: borrow<element>) -> element;
   }
   resource trusted-html {
   }
@@ -42,7 +40,6 @@ world canvas-pixels {
     document: func() -> document;
   }
 
-  import element-as-node: func(v: borrow<element>) -> node;
   import get-window: func() -> window;
   import now: func() -> f64;
 

@@ -57,7 +57,7 @@ impl Guest for Component {
             .add(&["hello".into(), "from-wasm".into()]);
         heading.text_content("Hello from Wasm!");
 
-        body.append_child(&element_as_node(&heading));
+        body.append_child(&heading);
     }
 }
 

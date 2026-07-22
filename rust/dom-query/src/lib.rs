@@ -56,7 +56,7 @@ fn create(document: &Document, tag: &str) -> Element {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&element_as_node(child));
+    parent.append_child(child);
 }
 
 fn set_attr(element: &Element, name: &str, value: &str) {
@@ -93,7 +93,7 @@ impl Guest for Component {
             append_child(&container, &item);
         }
         if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&container));
+            body.append_child(&container);
         }
 
         let total = count_n as f64 * iterations_n as f64;
@@ -147,8 +147,8 @@ impl Guest for Component {
         );
 
         if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&heading));
-            body.append_child(&element_as_node(&table));
+            body.append_child(&heading);
+            body.append_child(&table);
         }
     }
 }

@@ -6,15 +6,13 @@ world attribute-churn {
     create-element: func(local-name: string) -> element;
   }
   resource element {
-    append-child: func(node: borrow<node>) -> node;
+    append-child: func(child: borrow<element>) -> element;
     set-attribute: func(qualified-name: string, value: trusted-type-or-string);
     set-attributes: func(pairs: list<tuple<string, string>>);
     text-content: func(value: string);
   }
   resource html-element {
-    append-child: func(node: borrow<node>) -> node;
-  }
-  resource node {
+    append-child: func(child: borrow<element>) -> element;
   }
   resource trusted-html {
   }
@@ -36,7 +34,6 @@ world attribute-churn {
     document: func() -> document;
   }
 
-  import element-as-node: func(v: borrow<element>) -> node;
   import get-window: func() -> window;
   import now: func() -> f64;
 
