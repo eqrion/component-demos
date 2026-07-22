@@ -10,7 +10,8 @@ export let TrustedScript = globalThis.TrustedScript;
 export let TrustedScriptUrl = globalThis.TrustedScriptUrl;
 export let Window = globalThis.Window;
 
-Object.defineProperty(Window.prototype, "document", Object.getOwnPropertyDescriptor(window, "document"));
+// Object.defineProperty(Window.prototype, "document", Object.getOwnPropertyDescriptor(window, "document"));
+Window.prototype.document = () => window.document;
 Element.prototype.getContext2d = function() { return this.getContext("2d"); }
 
 export let getWindow = () => globalThis;
