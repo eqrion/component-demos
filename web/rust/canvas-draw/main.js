@@ -7,7 +7,7 @@ const { run } = await load({
 });
 
 const params = new URLSearchParams(window.location.search);
-const rects = Number(params.get("rects") ?? 50000);
+const rects = Number(params.get("rects") ?? 20000);
 
 const CANVAS_SIZE = 400;
 const RECT_SIZE = 3;
@@ -39,20 +39,19 @@ function runRawJs(rects) {
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = "indianred";
 
-  const bound = CANVAS_SIZE - RECT_SIZE;
   const start = performance.now();
   for (let i = 0; i < rects; i++) {
-    const x = (i * 7) % bound;
-    const y = (i * 13) % bound;
+    const x = Math.random() * (CANVAS_SIZE - RECT_SIZE);
+    const y = Math.random() * (CANVAS_SIZE - RECT_SIZE);
     ctx.fillRect(x, y, RECT_SIZE, RECT_SIZE);
   }
   const ms = performance.now() - start;
-  const nsPerCall = (ms * 1_000_000) / rects;
+  const usPerCall = (ms * 1_000) / rects;
 
   renderReport("Raw JS", canvas, [
     ["rects", rects.toString()],
-    ["total", `${ms.toFixed(2)} ms`],
-    ["per call", `${nsPerCall.toFixed(1)} ns`],
+    ["total", `${ms.toFixed(3)} ms`],
+    ["per fill_rect()", `${usPerCall.toFixed(3)} µs`],
   ]);
 }
 

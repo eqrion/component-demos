@@ -7,7 +7,7 @@ world canvas-draw {
   }
   resource canvas-rendering-context2d {
     fill-rect: func(x: f64, y: f64, width: f64, height: f64);
-    set-fill-style: func(value: string);
+    fill-style: func(value: string);
   }
   resource element {
     append-child: func(node: borrow<node>) -> node;

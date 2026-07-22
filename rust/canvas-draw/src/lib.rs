@@ -52,6 +52,17 @@ struct Component;
 const CANVAS_SIZE: f64 = 400.0;
 const RECT_SIZE: f64 = 3.0;
 
+// Simple xorshift prng
+fn rand(state: &mut u32) -> f64 {
+    let mut x = *state;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    *state = x;
+
+    x as f64 / (u32::MAX as f64 + 1.0)
+}
+
 fn create(document: &Document, tag: &str) -> Element {
     document.create_element(tag)
 }
@@ -83,42 +94,40 @@ impl Guest for Component {
     // frequent host call.
     fn run(rects: u32) {
         let document = get_window().document();
-        let count = rects.max(1);
+        let body = document.body().unwrap();
 
         let canvas = create(&document, "canvas");
         set_attr(&canvas, "width", &CANVAS_SIZE.to_string());
         set_attr(&canvas, "height", &CANVAS_SIZE.to_string());
         let ctx = canvas.get_context2d();
-        ctx.set_fill_style("steelblue");
+        ctx.fill_style("steelblue");
 
-        let bound = CANVAS_SIZE - RECT_SIZE;
         let start = now();
-        for i in 0..count {
-            let x = (i as f64 * 7.0) % bound;
-            let y = (i as f64 * 13.0) % bound;
+        let mut state = now() as u32;
+        for _ in 0..rects {
+            let x = rand(&mut state) * (CANVAS_SIZE - RECT_SIZE);
+            let y = rand(&mut state) * (CANVAS_SIZE - RECT_SIZE);
             ctx.fill_rect(x, y, RECT_SIZE, RECT_SIZE);
         }
         let ms = now() - start;
-        let ns_per_call = ms * 1_000_000.0 / count as f64;
+        let us_per_call = ms * 1_000.0 / rects as f64;
 
         let heading = create(&document, "h2");
-        heading.text_content("Rust component (wasm)");
+        heading.text_content("Wasm component (Rust)");
 
         let table = create(&document, "table");
-        append_row(&document, &table, "rects", &count.to_string());
-        append_row(&document, &table, "total", &format!("{ms:.2} ms"));
+        append_row(&document, &table, "rects", &rects.to_string());
+        append_row(&document, &table, "total", &format!("{ms:.3} ms"));
         append_row(
             &document,
             &table,
-            "per call",
-            &format!("{ns_per_call:.1} ns"),
+            "per fill_rect()",
+            &format!("{us_per_call:.3} µs"),
         );
 
-        if let Some(body) = document.body() {
-            body.append_child(&element_as_node(&heading));
-            body.append_child(&element_as_node(&canvas));
-            body.append_child(&element_as_node(&table));
-        }
+        body.append_child(&element_as_node(&heading));
+        body.append_child(&element_as_node(&canvas));
+        body.append_child(&element_as_node(&table));
     }
 }
 

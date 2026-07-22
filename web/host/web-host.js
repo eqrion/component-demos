@@ -40,7 +40,7 @@ class CanvasRenderingContext2d {
     const imageData = new ImageData(new Uint8ClampedArray(data), width, height);
     this.raw.putImageData(imageData, x, y);
   }
-  setFillStyle(value) {
+  fillStyle(value) {
     this.raw.fillStyle = value;
   }
 }
