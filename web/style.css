@@ -45,10 +45,6 @@ body:not(.no-styles) {
     border: 1px solid #b8bbc0;
   }
 
-  th {
-    border-bottom: 1px solid black;
-  }
-
   th,
   td {
     padding: 0.25rem 0.5rem;
