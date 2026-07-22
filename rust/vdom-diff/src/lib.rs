@@ -76,27 +76,19 @@ struct Row {
     element: Element,
 }
 
-fn create(document: &Document, tag: &str) -> Element {
-    document.create_element(tag)
-}
-
-fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(child);
-}
-
 fn insert_before(parent: &Element, child: &Element, reference: &Element) {
     parent.insert_before(child, reference);
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
-    let row = create(document, "tr");
-    let th = create(document, "th");
+    let row = document.create_element("tr");
+    let th = document.create_element("th");
     th.text_content(label);
-    append_child(&row, &th);
-    let td = create(document, "td");
+    row.append_child(&th);
+    let td = document.create_element("td");
     td.text_content(value);
-    append_child(&row, &td);
-    append_child(table, &row);
+    row.append_child(&td);
+    table.append_child(&row);
 }
 
 fn label_for(key: u32) -> String {
@@ -172,15 +164,15 @@ impl Guest for Component {
         let body = document.body().unwrap();
         let count = row_count.max(1);
 
-        let container = create(&document, "ul");
+        let container = document.create_element("ul");
         body.append_child(&container);
 
         let rows: Vec<Row> = (0..count)
             .map(|key| {
-                let element = create(&document, "li");
+                let element = document.create_element("li");
                 let label = format!("row {key}");
                 element.text_content(&label);
-                append_child(&container, &element);
+                container.append_child(&element);
                 Row {
                     key,
                     label,
@@ -230,7 +222,7 @@ impl Guest for Component {
                     row
                 }
                 None => {
-                    let element = create(&document, "li");
+                    let element = document.create_element("li");
                     element.text_content(&label);
                     inserts += 1;
                     Row {
@@ -260,8 +252,12 @@ impl Guest for Component {
             let Row { element, .. } = row;
             if !no_move[i] {
                 match &anchor {
-                    Some(next) => insert_before(&container, &element, next),
-                    None => append_child(&container, &element),
+                    Some(next) => {
+                        insert_before(&container, &element, next);
+                    }
+                    None => {
+                        container.append_child(&element);
+                    }
                 }
                 if positions[i] >= 0 {
                     moves += 1;
@@ -278,10 +274,10 @@ impl Guest for Component {
             0.0
         };
 
-        let heading = create(&document, "h2");
+        let heading = document.create_element("h2");
         heading.text_content("Wasm component (Rust)");
 
-        let table = create(&document, "table");
+        let table = document.create_element("table");
         append_row(&document, &table, "old rows", &count.to_string());
         append_row(&document, &table, "new rows", &new_keys.len().to_string());
         append_row(&document, &table, "inserts", &inserts.to_string());

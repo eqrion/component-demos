@@ -52,26 +52,18 @@ struct Component;
 
 const MAX_REPS: u64 = 1 << 20;
 
-fn create(document: &Document, tag: &str) -> Element {
-    document.create_element(tag)
-}
-
 fn set_attr(element: &Element, name: &str, value: &str) {
     element.set_attribute(name, TrustedTypeOrString::String(value.to_string()));
 }
 
-fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(child);
-}
-
 fn append_row(document: &Document, table: &Element, cell_tag: &str, cells: &[String]) {
-    let row = create(document, "tr");
+    let row = document.create_element("tr");
     for cell in cells {
-        let td = create(document, cell_tag);
+        let td = document.create_element(cell_tag);
         td.text_content(cell);
-        append_child(&row, &td);
+        row.append_child(&td);
     }
-    append_child(table, &row);
+    table.append_child(&row);
 }
 
 // Same autoranging timer as string-marshalling: double reps until at
@@ -102,7 +94,7 @@ impl Guest for Component {
         let dim = size_n as f64;
         let byte_len = size_n as usize * size_n as usize * 4;
 
-        let canvas = create(&document, "canvas");
+        let canvas = document.create_element("canvas");
         set_attr(&canvas, "width", &size_n.to_string());
         set_attr(&canvas, "height", &size_n.to_string());
         let ctx = canvas.get_context2d();
@@ -127,10 +119,10 @@ impl Guest for Component {
         let get_mb_s = (byte_len as f64 * get_reps as f64) / (get_ms * 1_000.0);
         let put_mb_s = (byte_len as f64 * put_reps as f64) / (put_ms * 1_000.0);
 
-        let heading = create(&document, "h2");
+        let heading = document.create_element("h2");
         heading.text_content("Wasm component (Rust)");
 
-        let table = create(&document, "table");
+        let table = document.create_element("table");
         append_row(
             &document,
             &table,

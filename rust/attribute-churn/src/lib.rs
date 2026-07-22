@@ -52,26 +52,18 @@ struct Component;
 
 const ATTRS: [&str; 4] = ["data-x", "data-y", "class", "title"];
 
-fn create(document: &Document, tag: &str) -> Element {
-    document.create_element(tag)
-}
-
-fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(child);
-}
-
 fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_write: &str) {
-    let row = create(document, "tr");
+    let row = document.create_element("tr");
     for value in [label, ms, ns_per_write] {
-        let td = create(document, "td");
+        let td = document.create_element("td");
         td.text_content(value);
-        append_child(&row, &td);
+        row.append_child(&td);
     }
-    append_child(table, &row);
+    table.append_child(&row);
 }
 
 fn build_elements(document: &Document, count: u32) -> Vec<Element> {
-    (0..count).map(|_| create(document, "div")).collect()
+    (0..count).map(|_| document.create_element("div")).collect()
 }
 
 impl Guest for Component {
@@ -114,17 +106,17 @@ impl Guest for Component {
         let individual_ns = individual_ms * 1_000_000.0 / total_writes;
         let batched_ns = batched_ms * 1_000_000.0 / total_writes;
 
-        let heading = create(&document, "h2");
+        let heading = document.create_element("h2");
         heading.text_content("Wasm component (Rust)");
 
-        let table = create(&document, "table");
-        let header = create(&document, "tr");
+        let table = document.create_element("table");
+        let header = document.create_element("tr");
         for label in ["approach", "total ms", "ns/write"] {
-            let th = create(&document, "th");
+            let th = document.create_element("th");
             th.text_content(label);
-            append_child(&header, &th);
+            header.append_child(&th);
         }
-        append_child(&table, &header);
+        table.append_child(&header);
 
         append_row(
             &document,

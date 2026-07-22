@@ -63,27 +63,19 @@ fn rand(state: &mut u32) -> f64 {
     x as f64 / (u32::MAX as f64 + 1.0)
 }
 
-fn create(document: &Document, tag: &str) -> Element {
-    document.create_element(tag)
-}
-
 fn set_attr(element: &Element, name: &str, value: &str) {
     element.set_attribute(name, TrustedTypeOrString::String(value.to_string()));
 }
 
-fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(child);
-}
-
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
-    let row = create(document, "tr");
-    let th = create(document, "th");
+    let row = document.create_element("tr");
+    let th = document.create_element("th");
     th.text_content(label);
-    append_child(&row, &th);
-    let td = create(document, "td");
+    row.append_child(&th);
+    let td = document.create_element("td");
     td.text_content(value);
-    append_child(&row, &td);
-    append_child(table, &row);
+    row.append_child(&td);
+    table.append_child(&row);
 }
 
 impl Guest for Component {
@@ -96,7 +88,7 @@ impl Guest for Component {
         let document = get_window().document();
         let body = document.body().unwrap();
 
-        let canvas = create(&document, "canvas");
+        let canvas = document.create_element("canvas");
         set_attr(&canvas, "width", &CANVAS_SIZE.to_string());
         set_attr(&canvas, "height", &CANVAS_SIZE.to_string());
         let ctx = canvas.get_context2d();
@@ -112,10 +104,10 @@ impl Guest for Component {
         let ms = now() - start;
         let us_per_call = ms * 1_000.0 / rects as f64;
 
-        let heading = create(&document, "h2");
+        let heading = document.create_element("h2");
         heading.text_content("Wasm component (Rust)");
 
-        let table = create(&document, "table");
+        let table = document.create_element("table");
         append_row(&document, &table, "rects", &rects.to_string());
         append_row(&document, &table, "total", &format!("{ms:.3} ms"));
         append_row(

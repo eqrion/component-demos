@@ -51,26 +51,18 @@ wit_bindgen::generate!({
 
 struct Component;
 
-fn create(document: &Document, tag: &str) -> Element {
-    document.create_element(tag)
-}
-
-fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(child);
-}
-
 fn set_attr(element: &Element, name: &str, value: &str) {
     element.set_attribute(name, TrustedTypeOrString::String(value.to_string()));
 }
 
 fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_element: &str) {
-    let row = create(document, "tr");
+    let row = document.create_element("tr");
     for value in [label, ms, ns_per_element] {
-        let td = create(document, "td");
+        let td = document.create_element("td");
         td.text_content(value);
-        append_child(&row, &td);
+        row.append_child(&td);
     }
-    append_child(table, &row);
+    table.append_child(&row);
 }
 
 impl Guest for Component {
@@ -84,14 +76,14 @@ impl Guest for Component {
         // document tree, so (unlike the other demos) this benchmark's
         // elements have to actually be attached; hide the container instead
         // of leaving it detached.
-        let container = create(&document, "div");
+        let container = document.create_element("div");
         set_attr(&container, "style", "display:none");
         let ids: Vec<String> = (0..count_n).map(|i| format!("item-{i}")).collect();
         for id in &ids {
-            let item = create(&document, "div");
+            let item = document.create_element("div");
             set_attr(&item, "id", id);
             set_attr(&item, "class", "item");
-            append_child(&container, &item);
+            container.append_child(&item);
         }
         body.append_child(&container);
 
@@ -118,17 +110,17 @@ impl Guest for Component {
         let individual_ns = individual_ms * 1_000_000.0 / total;
         let bulk_ns = bulk_ms * 1_000_000.0 / total;
 
-        let heading = create(&document, "h2");
+        let heading = document.create_element("h2");
         heading.text_content("Wasm component (Rust)");
 
-        let table = create(&document, "table");
-        let header = create(&document, "tr");
+        let table = document.create_element("table");
+        let header = document.create_element("tr");
         for label in ["approach", "total ms", "ns/element"] {
-            let th = create(&document, "th");
+            let th = document.create_element("th");
             th.text_content(label);
-            append_child(&header, &th);
+            header.append_child(&th);
         }
-        append_child(&table, &header);
+        table.append_child(&header);
 
         append_row(
             &document,

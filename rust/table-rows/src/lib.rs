@@ -49,22 +49,14 @@ wit_bindgen::generate!({
 
 struct Component;
 
-fn create(document: &Document, tag: &str) -> Element {
-    document.create_element(tag)
-}
-
-fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(child);
-}
-
 fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_row: &str) {
-    let row = create(document, "tr");
+    let row = document.create_element("tr");
     for value in [label, ms, ns_per_row] {
-        let td = create(document, "td");
+        let td = document.create_element("td");
         td.text_content(value);
-        append_child(&row, &td);
+        row.append_child(&td);
     }
-    append_child(table, &row);
+    table.append_child(&row);
 }
 
 impl Guest for Component {
@@ -80,19 +72,19 @@ impl Guest for Component {
         let body = document.body().unwrap();
         let count = row_count.max(1);
 
-        let table_el = create(&document, "table");
-        let tbody = create(&document, "tbody");
-        append_child(&table_el, &tbody);
+        let table_el = document.create_element("table");
+        let tbody = document.create_element("tbody");
+        table_el.append_child(&tbody);
         body.append_child(&table_el);
 
         let create_start = now();
         let mut rows = Vec::with_capacity(count as usize);
         for i in 0..count {
-            let tr = create(&document, "tr");
-            let td = create(&document, "td");
+            let tr = document.create_element("tr");
+            let td = document.create_element("td");
             td.text_content(&format!("row {i}"));
-            append_child(&tr, &td);
-            append_child(&tbody, &tr);
+            tr.append_child(&td);
+            tbody.append_child(&tr);
             rows.push((tr, td));
         }
         let create_ms = now() - create_start;
@@ -113,17 +105,17 @@ impl Guest for Component {
         }
         let clear_ms = now() - clear_start;
 
-        let heading = create(&document, "h2");
+        let heading = document.create_element("h2");
         heading.text_content("Wasm component (Rust)");
 
-        let report = create(&document, "table");
-        let header = create(&document, "tr");
+        let report = document.create_element("table");
+        let header = document.create_element("tr");
         for label in ["phase", "total ms", "ns/row"] {
-            let th = create(&document, "th");
+            let th = document.create_element("th");
             th.text_content(label);
-            append_child(&header, &th);
+            header.append_child(&th);
         }
-        append_child(&report, &header);
+        report.append_child(&header);
 
         append_row(
             &document,
