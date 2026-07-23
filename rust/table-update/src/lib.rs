@@ -69,7 +69,7 @@ fn append_row(
     let row = document.create_element("tr");
     for value in [label, ms, us_per_row, us_per_row_touched] {
         let td = document.create_element("td");
-        td.text_content(value);
+        td.set_text_content(value);
         row.append_child(&td);
     }
     table.append_child(&row);
@@ -77,17 +77,17 @@ fn append_row(
 
 impl Guest for Component {
     fn run(row_count: u32) {
-        let document = get_window().document();
-        let body = document.body().unwrap();
+        let document = get_window().get_document();
+        let body = document.get_body().unwrap();
 
         let heading = document.create_element("h2");
-        heading.text_content("Wasm component (Rust)");
+        heading.set_text_content("Wasm component (Rust)");
         body.append_child(&heading);
 
         let toggle = document.create_element("details");
         toggle.set_attribute("style", "margin-bottom: 1rem");
         let toggle_title = document.create_element("summary");
-        toggle_title.text_content("Result");
+        toggle_title.set_text_content("Result");
         toggle.append_child(&toggle_title);
         body.append_child(&toggle);
 
@@ -101,7 +101,7 @@ impl Guest for Component {
         for i in 1..=row_count {
             let tr = document.create_element("tr");
             let td = document.create_element("td");
-            td.text_content(&format!("row {i}"));
+            td.set_text_content(&format!("row {i}"));
             tr.append_child(&td);
             tbody.append_child(&tr);
             rows.push((tr, td));
@@ -113,7 +113,7 @@ impl Guest for Component {
         for (i, (tr, td)) in rows.iter().enumerate() {
             let i = i + 1;
             if is_prime(i) {
-                td.text_content(&format!("row {i} (prime)"));
+                td.set_text_content(&format!("row {i} (prime)"));
                 tr.set_attribute("data-prime", "data-prime");
                 updated += 1;
             }
@@ -134,7 +134,7 @@ impl Guest for Component {
         let header = document.create_element("tr");
         for label in ["phase", "total ms", "µs/row", "µs/row touched (est.)"] {
             let th = document.create_element("th");
-            th.text_content(label);
+            th.set_text_content(label);
             header.append_child(&th);
         }
         report.append_child(&header);

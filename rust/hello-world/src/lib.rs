@@ -48,14 +48,14 @@ struct Component;
 
 impl Guest for Component {
     fn run() {
-        let document = get_window().document();
-        let body = document.body().unwrap();
+        let document = get_window().get_document();
+        let body = document.get_body().unwrap();
 
         let heading = document.create_element("h1");
         heading
-            .class_list()
+            .get_class_list()
             .add(&["hello".into(), "from-wasm".into()]);
-        heading.text_content("Hello from Wasm!");
+        heading.set_text_content("Hello from Wasm!");
 
         body.append_child(&heading);
     }

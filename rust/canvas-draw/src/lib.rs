@@ -66,10 +66,10 @@ fn rand(state: &mut u32) -> f64 {
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
     let row = document.create_element("tr");
     let th = document.create_element("th");
-    th.text_content(label);
+    th.set_text_content(label);
     row.append_child(&th);
     let td = document.create_element("td");
-    td.text_content(value);
+    td.set_text_content(value);
     row.append_child(&td);
     table.append_child(&row);
 }
@@ -81,14 +81,14 @@ impl Guest for Component {
     // DOM-specific (resource-handle/string) cost or shows up for any
     // frequent host call.
     fn run(rects: u32) {
-        let document = get_window().document();
-        let body = document.body().unwrap();
+        let document = get_window().get_document();
+        let body = document.get_body().unwrap();
 
         let canvas = document.create_element("canvas");
         canvas.set_attribute("width", &CANVAS_SIZE.to_string());
         canvas.set_attribute("height", &CANVAS_SIZE.to_string());
         let ctx = canvas.get_context2d();
-        ctx.fill_style("steelblue");
+        ctx.set_fill_style("steelblue");
 
         let start = now();
         let mut state = now() as u32;
@@ -101,7 +101,7 @@ impl Guest for Component {
         let us_per_call = ms * 1_000.0 / rects as f64;
 
         let heading = document.create_element("h2");
-        heading.text_content("Wasm component (Rust)");
+        heading.set_text_content("Wasm component (Rust)");
 
         let table = document.create_element("table");
         append_row(&document, &table, "rects", &rects.to_string());

@@ -80,8 +80,8 @@ fn measure(min_ms: f64, mut run: impl FnMut(u64)) -> (u64, f64) {
 
 impl Guest for Component {
     fn run(min_ms: u32) {
-        let document = get_window().document();
-        let body = document.body().unwrap();
+        let document = get_window().get_document();
+        let body = document.get_body().unwrap();
 
         let el = document.create_element("div");
         let min_ms = min_ms.max(1) as f64;
@@ -106,7 +106,7 @@ impl Guest for Component {
         for &size in SIZES.iter() {
             let value = "x".repeat(size);
             el.set_text_content(&value);
-            debug_assert_eq!(el.text_content().len(), size);
+            debug_assert_eq!(el.get_text_content().len(), size);
 
             let (set_reps, set_ms) = measure(min_ms, |reps| {
                 for _ in 0..reps {
@@ -115,7 +115,7 @@ impl Guest for Component {
             });
             let (get_reps, get_ms) = measure(min_ms, |reps| {
                 for _ in 0..reps {
-                    let _ = el.text_content();
+                    let _ = el.get_text_content();
                 }
             });
 

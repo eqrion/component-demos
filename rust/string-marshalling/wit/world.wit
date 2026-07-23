@@ -2,20 +2,19 @@ package demos:string-marshalling;
 
 world string-marshalling {
   resource document {
-    body: func() -> option<html-element>;
+    get-body: func() -> option<html-element>;
     create-element: func(local-name: string) -> element;
   }
   resource element {
     append-child: func(child: borrow<element>) -> element;
-    // TODO: Decide how we actually want to distinguish between getters and setters
-    text-content: func() -> string;
+    get-text-content: func() -> string;
     set-text-content: func(value: string);
   }
   resource html-element {
     append-child: func(child: borrow<element>) -> element;
   }
   resource window {
-    document: func() -> document;
+    get-document: func() -> document;
   }
 
   import get-window: func() -> window;

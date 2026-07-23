@@ -81,7 +81,7 @@ fn append_child(parent: &Element, child: &Element) {
 }
 
 fn set_text(element: &Element, text: &str) {
-    element.text_content(text);
+    element.set_text_content(text);
 }
 
 fn append_text_node(document: &Document, parent: &Element, text: &str) {
@@ -132,8 +132,8 @@ fn build_filter(document: &Document, label: &str, href: &str, selected: bool) ->
 
 impl Guest for Component {
     fn run() {
-        let document = get_window().document();
-        let body = document.body().unwrap();
+        let document = get_window().get_document();
+        let body = document.get_body().unwrap();
 
         let root = create(&document, "section");
         set_class(&root, "todoapp");

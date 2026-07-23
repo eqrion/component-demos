@@ -2,14 +2,14 @@ package demos:todomvc;
 
 world todomvc {
   resource document {
-    body: func() -> option<html-element>;
+    get-body: func() -> option<html-element>;
     create-element: func(local-name: string) -> element;
     create-text-node: func(data: string) -> text;
   }
   resource element {
     append-child: func(node: borrow<node>) -> node;
     set-attribute: func(qualified-name: string, value: string);
-    text-content: func(value: string);
+    set-text-content: func(value: string);
   }
   resource html-element {
     append-child: func(node: borrow<node>) -> node;
@@ -19,11 +19,12 @@ world todomvc {
   resource text {
   }
   resource window {
-    document: func() -> document;
+    get-document: func() -> document;
   }
 
-  import element-as-node: func(v: borrow<element>) -> node;
   import get-window: func() -> window;
+
+  import element-as-node: func(v: borrow<element>) -> node;
   import text-as-node: func(v: borrow<text>) -> node;
 
   export run: func();

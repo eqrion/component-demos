@@ -61,7 +61,7 @@ fn append_row(
     let row = document.create_element("tr");
     for value in [label, iterations, ms, ns_per_element] {
         let td = document.create_element("td");
-        td.text_content(value);
+        td.set_text_content(value);
         row.append_child(&td);
     }
     table.append_child(&row);
@@ -69,8 +69,8 @@ fn append_row(
 
 impl Guest for Component {
     fn run(num_elements: u32, iterations: u32) {
-        let document = get_window().document();
-        let body = document.body().unwrap();
+        let document = get_window().get_document();
+        let body = document.get_body().unwrap();
 
         // Generate N elements to query for
         let container = document.create_element("div");
@@ -95,20 +95,20 @@ impl Guest for Component {
 
         let bulk_start = now();
         for _ in 0..iterations {
-            let _ = document.get_elements_by_class_name("rust-item");
+            let _ = document.get_elements_by_class_name_list("rust-item");
         }
         let bulk_ms = now() - bulk_start;
 
         let us_per_individual = individual_ms * 1_000.0 / num_individual_lookups;
 
         let heading = document.create_element("h2");
-        heading.text_content("Wasm component (Rust)");
+        heading.set_text_content("Wasm component (Rust)");
 
         let table = document.create_element("table");
         let header = document.create_element("tr");
         for label in ["approach", "iterations", "total ms", "µs/element"] {
             let th = document.create_element("th");
-            th.text_content(label);
+            th.set_text_content(label);
             header.append_child(&th);
         }
         table.append_child(&header);

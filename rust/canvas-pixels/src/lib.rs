@@ -59,9 +59,9 @@ fn checker(
     color1: &str,
     color2: &str,
 ) {
-    ctx.fill_style(color1);
+    ctx.set_fill_style(color1);
     ctx.fill_rect(0.0, 0.0, size as f64, size as f64);
-    ctx.fill_style(color2);
+    ctx.set_fill_style(color2);
     for x in 0..(size / checker_size) {
         for y in 0..(size / checker_size) {
             if (x + y) % 2 == 0 {
@@ -96,7 +96,7 @@ fn append_row(document: &Document, table: &Element, cell_tag: &str, cells: &[Str
     let row = document.create_element("tr");
     for cell in cells {
         let td = document.create_element(cell_tag);
-        td.text_content(cell);
+        td.set_text_content(cell);
         row.append_child(&td);
     }
     table.append_child(&row);
@@ -107,11 +107,11 @@ impl Guest for Component {
     // putImageData, instead of the UTF-16 strings (string-marshalling) or
     // resource handles (dom-query) the other demos move.
     fn run(size: u32, min_ms: u32) {
-        let document = get_window().document();
-        let body = document.body().unwrap();
+        let document = get_window().get_document();
+        let body = document.get_body().unwrap();
 
         let heading = document.create_element("h2");
-        heading.text_content("Wasm component (Rust)");
+        heading.set_text_content("Wasm component (Rust)");
         body.append_child(&heading);
 
         let wrapper = document.create_element("div");
@@ -122,7 +122,7 @@ impl Guest for Component {
         canvas1.set_attribute("width", &size.to_string());
         canvas1.set_attribute("height", &size.to_string());
         let ctx1 = canvas1.get_context2d();
-        ctx1.fill_style("steelblue");
+        ctx1.set_fill_style("steelblue");
         ctx1.fill_rect(0.0, 0.0, size as f64, size as f64);
         checker(&ctx1, size, 32, "steelblue", "sandybrown");
         wrapper.append_child(&canvas1);
@@ -139,7 +139,7 @@ impl Guest for Component {
 
         let (get_reps, get_ms) = measure(min_ms, |reps| {
             for _ in 0..reps {
-                pixels = ctx1.get_image_data(
+                pixels = ctx1.get_image_data_array_buffer(
                     MARGIN as f64,
                     MARGIN as f64,
                     (size - MARGIN * 2) as f64,
@@ -150,7 +150,7 @@ impl Guest for Component {
         let byte_len = pixels.len();
         let (put_reps, put_ms) = measure(min_ms, |reps| {
             for _ in 0..reps {
-                ctx2.put_image_data(
+                ctx2.put_image_data_array_buffer(
                     &pixels,
                     MARGIN as f64,
                     MARGIN as f64,

@@ -2,21 +2,21 @@ package demos:dom-query;
 
 world dom-query {
   resource document {
-    body: func() -> option<html-element>;
+    get-body: func() -> option<html-element>;
     create-element: func(local-name: string) -> element;
     get-element-by-id: func(element-id: string) -> option<element>;
-    get-elements-by-class-name: func(class-name: string) -> list<element>;
+    get-elements-by-class-name-list: func(class-name: string) -> list<element>;
   }
   resource element {
     append-child: func(child: borrow<element>) -> element;
     set-attribute: func(qualified-name: string, value: string);
-    text-content: func(value: string);
+    set-text-content: func(value: string);
   }
   resource html-element {
     append-child: func(child: borrow<element>) -> element;
   }
   resource window {
-    document: func() -> document;
+    get-document: func() -> document;
   }
 
   import get-window: func() -> window;

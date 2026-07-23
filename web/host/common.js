@@ -1,4 +1,3 @@
-import * as webNative from "./web-native.js";
 import * as webHost from "./web-host.js";
 
 function isNative() {
@@ -14,7 +13,7 @@ export async function load({ jco, wasm }) {
   console.log("using native");
   const bytes = await (await fetch(wasm)).arrayBuffer();
   const component = new WebAssembly.Component(bytes);
-  const instance = new WebAssembly.ComponentInstance(component, { ...webNative });
+  const instance = new WebAssembly.ComponentInstance(component, { ...webHost });
   return instance.exports;
 }
 

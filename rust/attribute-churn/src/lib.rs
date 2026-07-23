@@ -59,18 +59,18 @@ fn build_elements(document: &Document, count: u32) -> Vec<Element> {
 fn append_row(document: &Document, table: &Element, label: &str, value: &str) {
     let row = document.create_element("tr");
     let th = document.create_element("th");
-    th.text_content(label);
+    th.set_text_content(label);
     row.append_child(&th);
     let td = document.create_element("td");
-    td.text_content(value);
+    td.set_text_content(value);
     row.append_child(&td);
     table.append_child(&row);
 }
 
 impl Guest for Component {
     fn run(elements: u32, iters: u32) {
-        let document = get_window().document();
-        let body = document.body().unwrap();
+        let document = get_window().get_document();
+        let body = document.get_body().unwrap();
         let total_writes = elements as f64 * iters as f64 * ATTRS.len() as f64;
 
         let elements = build_elements(&document, elements);
@@ -87,7 +87,7 @@ impl Guest for Component {
         let us_per_element = total_ms * 1_000.0 / total_writes;
 
         let heading = document.create_element("h2");
-        heading.text_content("Wasm component (Rust)");
+        heading.set_text_content("Wasm component (Rust)");
 
         let table = document.create_element("table");
         append_row(&document, &table, "num calls", &total_writes.to_string());

@@ -2,24 +2,24 @@ package demos:canvas-draw;
 
 world canvas-draw {
   resource document {
-    body: func() -> option<html-element>;
+    get-body: func() -> option<html-element>;
     create-element: func(local-name: string) -> element;
   }
   resource canvas-rendering-context2d {
     fill-rect: func(x: f64, y: f64, width: f64, height: f64);
-    fill-style: func(value: string);
+    set-fill-style: func(value: string);
   }
   resource element {
     append-child: func(child: borrow<element>) -> element;
     get-context2d: func() -> canvas-rendering-context2d;
     set-attribute: func(qualified-name: string, value: string);
-    text-content: func(value: string);
+    set-text-content: func(value: string);
   }
   resource html-element {
     append-child: func(child: borrow<element>) -> element;
   }
   resource window {
-    document: func() -> document;
+    get-document: func() -> document;
   }
 
   import get-window: func() -> window;
