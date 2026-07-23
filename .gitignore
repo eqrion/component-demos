@@ -10,5 +10,5 @@ web/*/*/native/
 # C / raw-toolchain intermediates
 build/
 **/bindings/
-# WASI SDK sysroot, installed on demand via install_wasi_sdk.sh
-_sysroot/
+# WASI SDK (full toolchain), installed on demand via install_wasi_sdk.sh
+_wasi-sdk/
