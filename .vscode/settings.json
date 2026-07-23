@@ -12,6 +12,5 @@
     "rust/string-marshalling/Cargo.toml",
     "rust/table-update/Cargo.toml",
     "rust/todomvc/Cargo.toml",
-    "rust/vdom-diff/Cargo.toml"
   ]
 }
