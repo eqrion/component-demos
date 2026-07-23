@@ -4,10 +4,14 @@ cd "$(dirname "$0")"
 
 webdir="c/greet-libc"
 
+sdk="../../_wasi-sdk"
+clang="$sdk/bin/clang"
+sysroot="$sdk/share/wasi-sysroot"
+
 mkdir -p build
-clang -c -O1 -target wasm32-wasip2 --sysroot=../../_sysroot \
+$clang -c -O1 -target wasm32-wasip2 --sysroot="$sysroot" \
   greet.c -o build/greet.o
-clang -target wasm32-wasip2 --sysroot=../../_sysroot \
+$clang -target wasm32-wasip2 --sysroot="$sysroot" \
   -mexec-model=reactor \
   -Wl,--no-entry \
   -Wl,--component-type,greet.wit \
