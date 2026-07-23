@@ -1,0 +1,26 @@
+package demos:hello-world;
+
+world hello-world {
+  resource document {
+    body: func() -> option<html-element>;
+    create-element: func(local-name: string) -> element;
+  }
+  resource dom-token-list {
+    add: func(tokens: list<string>);
+  }
+  resource element {
+    append-child: func(child: borrow<element>) -> element;
+    class-list: func() -> dom-token-list;
+    text-content: func(value: string);
+  }
+  resource html-element {
+    append-child: func(child: borrow<element>) -> element;
+  }
+  resource window {
+    document: func() -> document;
+  }
+
+  import get-window: func() -> window;
+
+  export run: func();
+}
