@@ -9,7 +9,7 @@ world canvas-pixels {
     fill-rect: func(x: f64, y: f64, width: f64, height: f64);
     get-image-data: func(x: f64, y: f64, width: f64, height: f64) -> list<u8>;
     put-image-data: func(data: list<u8>, x: f64, y: f64, width: f64, height: f64);
-    set-fill-style: func(value: string);
+    fill-style: func(value: string);
   }
   resource element {
     append-child: func(child: borrow<element>) -> element;

@@ -8,7 +8,7 @@ const { run } = await load({
 
 const params = new URLSearchParams(window.location.search);
 const size = Number(params.get("size") ?? 256);
-const minMs = Number(params.get("ms") ?? 10);
+const minMs = 10;
 
 const MAX_REPS = 1 << 20;
 
@@ -28,15 +28,23 @@ function measure(minMs, run) {
   }
 }
 
-function renderReport(title, canvas, rows) {
-  const heading = document.createElement("h2");
-  heading.textContent = title;
-  document.body.appendChild(heading);
-  document.body.appendChild(canvas);
+function checker(ctx, size, checkerSize, color1, color2) {
+  ctx.fillStyle = color1;
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = color2;
+  for (let x = 0; x < Math.floor(size / checkerSize); x++) {
+    for (let y = 0; y < Math.floor(size / checkerSize); y++) {
+      if ((x + y) % 2 === 0) {
+        ctx.fillRect(x * checkerSize, y * checkerSize, checkerSize, checkerSize);
+      }
+    }
+  }
+}
 
+function buildTable(headerCells, rows) {
   const table = document.createElement("table");
   const header = document.createElement("tr");
-  for (const label of ["direction", "bytes/call", "ns/call", "MB/s"]) {
+  for (const label of headerCells) {
     const th = document.createElement("th");
     th.textContent = label;
     header.appendChild(th);
@@ -52,36 +60,61 @@ function renderReport(title, canvas, rows) {
     }
     table.appendChild(row);
   }
-  document.body.appendChild(table);
+  return table;
 }
 
 function runRawJs(size, minMs) {
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "indianred";
-  ctx.fillRect(0, 0, size, size);
+  const heading = document.createElement("h2");
+  heading.textContent = "Raw JS";
+  document.body.appendChild(heading);
 
-  const byteLen = size * size * 4;
-  const pixels = new Uint8ClampedArray(byteLen).fill(128);
+  const wrapper = document.createElement("div");
+  wrapper.setAttribute("style", "display: flex; gap: 1rem; margin-bottom: 1rem");
+  document.body.appendChild(wrapper);
+
+  const canvas1 = document.createElement("canvas");
+  canvas1.width = size;
+  canvas1.height = size;
+  const ctx1 = canvas1.getContext("2d");
+  ctx1.fillStyle = "steelblue";
+  ctx1.fillRect(0, 0, size, size);
+  checker(ctx1, size, 32, "steelblue", "sandybrown");
+  wrapper.appendChild(canvas1);
+
+  const canvas2 = document.createElement("canvas");
+  canvas2.width = size;
+  canvas2.height = size;
+  const ctx2 = canvas2.getContext("2d");
+  checker(ctx2, size, 16, "mediumturquoise", "indianred");
+  wrapper.appendChild(canvas2);
+
+  const MARGIN = 40;
+  let pixels;
 
   const [getReps, getMs] = measure(minMs, (reps) => {
-    for (let i = 0; i < reps; i++) ctx.getImageData(0, 0, size, size);
+    for (let i = 0; i < reps; i++) {
+      pixels = ctx1.getImageData(MARGIN, MARGIN, size - MARGIN * 2, size - MARGIN * 2);
+    }
   });
+  const byteLen = pixels.data.length;
   const [putReps, putMs] = measure(minMs, (reps) => {
-    for (let i = 0; i < reps; i++) ctx.putImageData(new ImageData(pixels, size, size), 0, 0);
+    for (let i = 0; i < reps; i++) {
+      ctx2.putImageData(pixels, MARGIN, MARGIN);
+    }
   });
 
-  const getNs = (getMs * 1_000_000) / getReps;
-  const putNs = (putMs * 1_000_000) / putReps;
-  const getMbS = (byteLen * getReps) / (getMs * 1_000);
-  const putMbS = (byteLen * putReps) / (putMs * 1_000);
+  const getUs = (getMs * 1_000) / getReps;
+  const putUs = (putMs * 1_000) / putReps;
+  const getMbS = (byteLen * getReps / 1_000_000) / (getMs / 1_000);
+  const putMbS = (byteLen * putReps / 1_000_000) / (putMs / 1_000);
 
-  renderReport("Raw JS", canvas, [
-    ["get (read pixels)", byteLen.toString(), getNs.toFixed(1), getMbS.toFixed(1)],
-    ["put (write pixels)", byteLen.toString(), putNs.toFixed(1), putMbS.toFixed(1)],
-  ]);
+  document.body.appendChild(buildTable(
+    ["direction", "bytes/call", "µs/call", "MB/s"],
+    [
+      ["getImageData()", `${byteLen}`, getUs.toFixed(1), getMbS.toFixed(1)],
+      ["putImageData()", `${byteLen}`, putUs.toFixed(1), putMbS.toFixed(1)],
+    ],
+  ));
 }
 
 runRawJs(size, minMs);
