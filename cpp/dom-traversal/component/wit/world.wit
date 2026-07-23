@@ -1,0 +1,25 @@
+package demos:dom-traversal;
+
+world dom-traversal {
+  resource document {
+    get-body: func() -> option<html-element>;
+    create-element: func(local-name: string) -> element;
+  }
+  resource element {
+    append-child: func(child: borrow<element>) -> element;
+    get-first-child: func() -> option<element>;
+    get-next-sibling: func() -> option<element>;
+    set-text-content: func(value: string);
+  }
+  resource html-element {
+    append-child: func(child: borrow<element>) -> element;
+  }
+  resource window {
+    get-document: func() -> document;
+  }
+
+  import get-window: func() -> window;
+  import now: func() -> f64;
+
+  export run: func(depth: s32, node-count: s32);
+}

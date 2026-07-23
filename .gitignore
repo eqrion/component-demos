@@ -4,6 +4,7 @@ node_modules/
 web/dist/
 web/*/*/jco/
 web/*/*/native/
+web/*/*/emscripten/
 **/src/bindings.rs
 .DS_Store
 
