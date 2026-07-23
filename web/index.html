@@ -3,17 +3,21 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>WASM Component Model demos</title>
+  <title>Wasm Component Model demos</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
-  <h1>WASM Component Model demos</h1>
+  <h1>WebAssembly Component Model demos</h1>
   <p>WebAssembly components built from various languages and toolchains.</p>
 
   <h2>Rust</h2>
-  <p>Unless stated otherwise, all demos are built using wit-bindgen (<code>wit_bindgen::generate!</code>) and compiled
-    using the <code>wasm32-wasip2</code> target.</p>
+  <p>
+    Unless stated otherwise, all demos are built using wit-bindgen
+    (<code>wit_bindgen::generate!</code>) and compiled using the
+    <code>wasm32-wasip2</code> target. Despite the name of the target, examples
+    do not use WASI.
+  </p>
   <ul>
     <li><a href="./rust/hello-world/">Hello, world</a></li>
     <li><a href="./rust/calculator/">Calculator</a></li>
