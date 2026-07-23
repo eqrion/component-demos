@@ -8,6 +8,8 @@ const { run } = await load({
 
 const params = new URLSearchParams(window.location.search);
 const rowCount = Number(params.get("rows") ?? 2000);
+window.numRows.textContent = `${rowCount}`;
+await new Promise(res => setTimeout(res, 0));
 
 function isPrime(n) {
   for (let i = 2; i <= Math.floor(n / 2); i++) {
