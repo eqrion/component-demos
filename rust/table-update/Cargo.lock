@@ -194,7 +194,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "table-rows"
+name = "table-update"
 version = "0.1.0"
 dependencies = [
  "dlmalloc",

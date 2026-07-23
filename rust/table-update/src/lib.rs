@@ -43,15 +43,31 @@ unsafe extern "C" fn cabi_realloc(
 }
 
 wit_bindgen::generate!({
-    world: "table-rows",
+    world: "table-update",
     path: "wit",
 });
 
 struct Component;
 
-fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_per_row: &str) {
+fn is_prime(n: usize) -> bool {
+    for i in 2..=n / 2 {
+        if n % i == 0 {
+            return false;
+        }
+    }
+    true
+}
+
+fn append_row(
+    document: &Document,
+    table: &Element,
+    label: &str,
+    ms: &str,
+    us_per_row: &str,
+    us_per_row_touched: &str,
+) {
     let row = document.create_element("tr");
-    for value in [label, ms, ns_per_row] {
+    for value in [label, ms, us_per_row, us_per_row_touched] {
         let td = document.create_element("td");
         td.text_content(value);
         row.append_child(&td);
@@ -60,26 +76,29 @@ fn append_row(document: &Document, table: &Element, label: &str, ms: &str, ns_pe
 }
 
 impl Guest for Component {
-    // A composite, js-framework-benchmark-style workload: create a table of
-    // rows, patch a fraction of them, then remove them all, timing each
-    // phase separately. Combines what dom-traversal/attribute-churn/
-    // dom-query measure in isolation into one sequence closer to a real
-    // app's per-frame DOM work. No event listeners (the component model
-    // doesn't support callbacks into a component yet), so the phases run
-    // as a fixed script rather than in response to real interaction.
     fn run(row_count: u32) {
         let document = get_window().document();
         let body = document.body().unwrap();
-        let count = row_count.max(1);
+
+        let heading = document.create_element("h2");
+        heading.text_content("Wasm component (Rust)");
+        body.append_child(&heading);
+
+        let toggle = document.create_element("details");
+        toggle.set_attribute("style", "margin-bottom: 1rem");
+        let toggle_title = document.create_element("summary");
+        toggle_title.text_content("Result");
+        toggle.append_child(&toggle_title);
+        body.append_child(&toggle);
 
         let table_el = document.create_element("table");
         let tbody = document.create_element("tbody");
         table_el.append_child(&tbody);
-        body.append_child(&table_el);
+        toggle.append_child(&table_el);
 
         let create_start = now();
-        let mut rows = Vec::with_capacity(count as usize);
-        for i in 0..count {
+        let mut rows = Vec::with_capacity(row_count as usize);
+        for i in 1..=row_count {
             let tr = document.create_element("tr");
             let td = document.create_element("td");
             td.text_content(&format!("row {i}"));
@@ -91,26 +110,29 @@ impl Guest for Component {
 
         let update_start = now();
         let mut updated: u32 = 0;
-        for (i, (_, td)) in rows.iter().enumerate() {
-            if i % 10 == 0 {
-                td.text_content(&format!("row {i} !!!"));
+        for (i, (tr, td)) in rows.iter().enumerate() {
+            let i = i + 1;
+            if is_prime(i) {
+                td.text_content(&format!("row {i} (prime)"));
+                tr.set_attribute("data-prime", "data-prime");
                 updated += 1;
             }
         }
         let update_ms = now() - update_start;
 
         let clear_start = now();
+        let mut cleared: u32 = 0;
         for (tr, _) in &rows {
-            tr.remove();
+            if tr.get_attribute("data-prime").is_none() {
+                tr.remove();
+                cleared += 1;
+            }
         }
         let clear_ms = now() - clear_start;
 
-        let heading = document.create_element("h2");
-        heading.text_content("Wasm component (Rust)");
-
         let report = document.create_element("table");
         let header = document.create_element("tr");
-        for label in ["phase", "total ms", "ns/row"] {
+        for label in ["phase", "total ms", "µs/row", "µs/row touched (est.)"] {
             let th = document.create_element("th");
             th.text_content(label);
             header.append_child(&th);
@@ -121,25 +143,27 @@ impl Guest for Component {
             &document,
             &report,
             "create",
-            &format!("{create_ms:.2}"),
-            &format!("{:.1}", create_ms * 1_000_000.0 / count as f64),
+            &format!("{create_ms:.3}"),
+            &format!("{:.3}", create_ms * 1_000.0 / row_count as f64),
+            "-",
         );
         append_row(
             &document,
             &report,
-            "update (1/10 rows)",
-            &format!("{update_ms:.2}"),
-            &format!("{:.1}", update_ms * 1_000_000.0 / updated.max(1) as f64),
+            "update (primes)",
+            &format!("{update_ms:.3}"),
+            &format!("{:.3}", update_ms * 1_000.0 / row_count as f64),
+            &format!("{:.3}", update_ms * 1_000.0 / updated as f64),
         );
         append_row(
             &document,
             &report,
-            "clear",
-            &format!("{clear_ms:.2}"),
-            &format!("{:.1}", clear_ms * 1_000_000.0 / count as f64),
+            "clear (non-primes)",
+            &format!("{clear_ms:.3}"),
+            &format!("{:.3}", clear_ms * 1_000.0 / row_count as f64),
+            &format!("{:.3}", clear_ms * 1_000.0 / cleared as f64),
         );
 
-        body.append_child(&heading);
         body.append_child(&report);
     }
 }

@@ -79,6 +79,9 @@ class Element extends Node {
   remove() {
     this.raw.remove();
   }
+  getAttribute(qualifiedName) {
+    return this.raw.getAttribute(qualifiedName);
+  }
   setAttribute(qualifiedName, value) {
     this.raw.setAttribute(qualifiedName, value);
   }

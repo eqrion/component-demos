@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Table update benchmark</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+  <div id="nav"></div>
+
+  <p>
+    Create a table, update a selection of the rows (only prime-numbered rows),
+    and then delete several rows (those which are not prime). Designed to be a
+    somewhat more realistic overall DOM example.
+  </p>
+  <p>
+    Note that "time per row touched" is slightly wonky, since it includes time
+    spent evaluating other rows that do not end up being updated/cleared, hence
+    the "est.".
+  </p>
+
+  <script type="module" src="./main.js"></script>
+</body>
+
+</html>

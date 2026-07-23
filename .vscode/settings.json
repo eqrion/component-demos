@@ -10,7 +10,7 @@
     "rust/dom-traversal/Cargo.toml",
     "rust/hello-world/Cargo.toml",
     "rust/string-marshalling/Cargo.toml",
-    "rust/table-rows/Cargo.toml",
+    "rust/table-update/Cargo.toml",
     "rust/todomvc/Cargo.toml",
     "rust/vdom-diff/Cargo.toml"
   ]

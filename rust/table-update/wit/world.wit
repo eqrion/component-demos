@@ -1,6 +1,6 @@
-package demos:table-rows;
+package demos:table-update;
 
-world table-rows {
+world table-update {
   resource document {
     body: func() -> option<html-element>;
     create-element: func(local-name: string) -> element;
@@ -9,9 +9,15 @@ world table-rows {
     append-child: func(child: borrow<element>) -> element;
     remove: func();
     text-content: func(value: string);
+    get-attribute: func(qualified-name: string) -> option<string>;
+    set-attribute: func(qualified-name: string, value: string);
+    class-list: func() -> dom-token-list;
   }
   resource html-element {
     append-child: func(child: borrow<element>) -> element;
+  }
+  resource dom-token-list {
+    add: func(tokens: list<string>);
   }
   resource window {
     document: func() -> document;

@@ -2,8 +2,8 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-wasm="table_rows"
-webdir="rust/table-rows"
+wasm="table_update"
+webdir="rust/table-update"
 
 cargo build --release
 
