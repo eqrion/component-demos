@@ -63,11 +63,15 @@ function runRawJs(minMs) {
     el.textContent = value;
     console.assert(el.textContent.length === size);
 
+    let totalLength = 0;
     const [setReps, setMs] = measure(minMs, (reps) => {
       for (let i = 0; i < reps; i++) el.textContent = value;
     });
     const [getReps, getMs] = measure(minMs, (reps) => {
-      for (let i = 0; i < reps; i++) void el.textContent;
+      for (let i = 0; i < reps; i++) {
+        let a = el.textContent;
+        totalLength += a.length;
+      };
     });
 
     const setUsPerCall = (setMs * 1_000) / setReps;
