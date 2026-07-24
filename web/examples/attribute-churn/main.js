@@ -81,3 +81,11 @@ const { run: runCpp } = await load({
   wasm: new URL("../../cpp/attribute-churn/native/attribute_churn.wasm", import.meta.url),
 });
 runCpp(elementCount, iters);
+await new Promise(res => setTimeout(res, 100));
+
+// c (component)
+const { run: runC } = await load({
+  jco: () => import("../../c/attribute-churn/jco/attribute_churn.js"),
+  wasm: new URL("../../c/attribute-churn/native/attribute_churn.wasm", import.meta.url),
+});
+runC(elementCount, iters);
