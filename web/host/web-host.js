@@ -9,6 +9,8 @@ export let Window = globalThis.Window;
 export let PerformanceMark = globalThis.PerformanceMark;
 export let PerformanceMeasure = globalThis.PerformanceMeasure;
 export let Performance = globalThis.Performance;
+let originalMeasure = Performance.prototype.measure;
+Performance.prototype.measure = function (...args) { return originalMeasure.apply(this, args); };
 
 export let getWindow = () => globalThis;
 export let getPerformance = () => globalThis.performance;
