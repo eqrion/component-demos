@@ -1,0 +1,38 @@
+package demos:table-update;
+
+world table-update {
+  resource document {
+    get-body: func() -> option<html-element>;
+    create-element: func(local-name: string) -> element;
+  }
+  resource element {
+    append-child: func(child: borrow<element>) -> element;
+    remove: func();
+    set-text-content: func(value: string);
+    get-attribute: func(qualified-name: string) -> option<string>;
+    set-attribute: func(qualified-name: string, value: string);
+    get-class-list: func() -> dom-token-list;
+  }
+  resource html-element {
+    append-child: func(child: borrow<element>) -> element;
+  }
+  resource dom-token-list {
+    add: func(tokens: list<string>);
+  }
+  resource window {
+    get-document: func() -> document;
+  }
+  resource performance-mark {}
+  resource performance-measure {
+    get-duration: func() -> f64;
+  }
+  resource performance {
+    mark: func(mark-name: string) -> performance-mark;
+    measure: func(measure-name: string, start-mark: string, end-mark: string) -> performance-measure;
+  }
+
+  import get-window: func() -> window;
+  import get-performance: func() -> performance;
+
+  export run: func(row-count: u32);
+}
