@@ -1,10 +1,6 @@
 import { init, load } from "../../host/common.js";
 
 init();
-const { run } = await load({
-  jco: () => import("../../rust/dom-query/jco/dom_query.js"),
-  wasm: new URL("../../rust/dom-query/native/dom_query.wasm", import.meta.url),
-});
 
 const params = new URLSearchParams(window.location.search);
 const numElements = Number(params.get("num_elements") ?? 10000);
@@ -81,6 +77,35 @@ function runRawJs(count, iterations) {
   performance.measure("js", "js-start", "js-end");
 }
 
+// js
 runRawJs(numElements, iterations);
 await new Promise(res => setTimeout(res, 100));
-run(numElements, iterations);
+
+// c++ (emscripten)
+const { default: createEmscripten } = await import("../../cpp/dom-query/emscripten/dom_query.mjs");
+const emscripten = await createEmscripten();
+emscripten.run(numElements, iterations);
+await new Promise(res => setTimeout(res, 100));
+
+// rust
+const { run: runRust } = await load({
+  jco: () => import("../../rust/dom-query/jco/dom_query.js"),
+  wasm: new URL("../../rust/dom-query/native/dom_query.wasm", import.meta.url),
+});
+runRust(numElements, iterations);
+await new Promise(res => setTimeout(res, 100));
+
+// c++ (component)
+const { run: runCpp } = await load({
+  jco: () => import("../../cpp/dom-query/jco/dom_query.js"),
+  wasm: new URL("../../cpp/dom-query/native/dom_query.wasm", import.meta.url),
+});
+runCpp(numElements, iterations);
+await new Promise(res => setTimeout(res, 100));
+
+// c (component)
+const { run: runC } = await load({
+  jco: () => import("../../c/dom-query/jco/dom_query.js"),
+  wasm: new URL("../../c/dom-query/native/dom_query.wasm", import.meta.url),
+});
+runC(numElements, iterations);
