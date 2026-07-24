@@ -13,3 +13,5 @@ build/
 **/bindings/
 # WASI SDK (full toolchain), installed on demand via install_wasi_sdk.sh
 _wasi-sdk/
+# Emscripten SDK (emsdk + pinned toolchain), installed via install_emscripten.sh
+_emsdk/
