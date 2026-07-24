@@ -47,11 +47,7 @@ static void append_row(const dom::Document &document, const dom::Element &table,
 void exports::dom_traversal::Run(int32_t depth, int32_t num_children) {
   dom::Window window = dom::GetWindow();
   dom::Document document = window.GetDocument();
-
-  std::optional<dom::HtmlElement> body = document.GetBody();
-  if (!body) {
-    return;
-  }
+  dom::HtmlElement body = document.GetBody().value();
 
   double build_start = dom::Now();
   dom::Element root = build_tree(document, depth, num_children);
@@ -74,24 +70,17 @@ void exports::dom_traversal::Run(int32_t depth, int32_t num_children) {
   append_row(document, table, "nodes", std::string_view(buf, n));
 
   n = fmt_fixed(buf, 0, build_ms, 2);
-  buf[n++] = ' ';
-  buf[n++] = 'm';
-  buf[n++] = 's';
+  n = fmt_str(buf, n, " ms");
   append_row(document, table, "build", std::string_view(buf, n));
 
   n = fmt_fixed(buf, 0, traverse_ms, 2);
-  buf[n++] = ' ';
-  buf[n++] = 'm';
-  buf[n++] = 's';
+  n = fmt_str(buf, n, " ms");
   append_row(document, table, "traverse (total)", std::string_view(buf, n));
 
   n = fmt_fixed(buf, 0, us_per_node, 3);
-  buf[n++] = ' ';
-  buf[n++] = static_cast<char>(0xC2);
-  buf[n++] = static_cast<char>(0xB5); // µ
-  buf[n++] = 's';
+  n = fmt_str(buf, n, " µs");
   append_row(document, table, "traverse (per node)", std::string_view(buf, n));
 
-  body->AppendChild(std::cref(heading));
-  body->AppendChild(std::cref(table));
+  body.AppendChild(std::cref(heading));
+  body.AppendChild(std::cref(table));
 }

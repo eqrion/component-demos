@@ -25,7 +25,7 @@ static unsigned traverse(val node) {
   return 1 + traverse(node["firstChild"]) + traverse(node["nextSibling"]);
 }
 
-static std::string fmt(double v, int decimals, const char *suffix) {
+static std::string fmt_measurement(double v, int decimals, const char *suffix) {
   char buf[64];
   snprintf(buf, sizeof buf, "%.*f%s", decimals, v, suffix);
   return buf;
@@ -62,10 +62,11 @@ static void run(int depth, int num_children) {
 
   val table = document.call<val>("createElement", val("table"));
   append_row(document, table, "nodes", std::to_string(node_total));
-  append_row(document, table, "build", fmt(build_ms, 2, " ms"));
-  append_row(document, table, "traverse (total)", fmt(traverse_ms, 2, " ms"));
+  append_row(document, table, "build", fmt_measurement(build_ms, 2, " ms"));
+  append_row(document, table, "traverse (total)",
+             fmt_measurement(traverse_ms, 2, " ms"));
   append_row(document, table, "traverse (per node)",
-             fmt(us_per_node, 3, " µs"));
+             fmt_measurement(us_per_node, 3, " µs"));
 
   body.call<void>("appendChild", heading);
   body.call<void>("appendChild", table);

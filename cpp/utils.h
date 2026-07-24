@@ -1,11 +1,28 @@
 #pragma once
 
+#include <__verbose_abort>
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
 
 // Utilities common across our C++ examples, mostly to avoid the use of the
 // standard library (since this tends to pull in lots of WASI stuff we don't
 // care about.)
+
+// Simple abort handler that just does `unreachable`. (Because we are building
+// with exceptions off, this is thankfully the only thing we need to provide.)
+[[noreturn]] inline void std::__libcpp_verbose_abort(const char *,
+                                                     ...) noexcept {
+  __builtin_trap();
+}
+
+// Copy the bytes of `s` into buf at `pos`; return the new position.
+static size_t fmt_str(char *buf, size_t pos, std::string_view s) {
+  for (char c : s) {
+    buf[pos++] = c;
+  }
+  return pos;
+}
 
 // Write `v` as decimal into buf at `pos`; return the new position.
 static size_t fmt_uint(char *buf, size_t pos, uint64_t v) {
