@@ -65,6 +65,7 @@ function buildTable(headerCells, rows) {
 }
 
 function runRawJs(size, minMs) {
+  performance.mark("js-start");
   const heading = document.createElement("h2");
   heading.textContent = "Raw JS";
   document.body.appendChild(heading);
@@ -116,6 +117,9 @@ function runRawJs(size, minMs) {
       ["putImageData()", `${byteLen}`, putUs.toFixed(1), putMbS.toFixed(1)],
     ],
   ));
+
+  performance.mark("js-end");
+  performance.measure("js", "js-start", "js-end");
 }
 
 runRawJs(size, minMs);

@@ -29,6 +29,8 @@ void exports::attribute_churn::Run(uint32_t elements, uint32_t iters) {
   dom::HtmlElement body = document.GetBody().value();
   dom::Performance perf = dom::GetPerformance();
 
+  perf.Mark("cpp-start");
+
   uint64_t total_writes = static_cast<uint64_t>(elements) * iters * 4;
 
   std::vector<dom::Element> els;
@@ -72,4 +74,7 @@ void exports::attribute_churn::Run(uint32_t elements, uint32_t iters) {
 
   body.AppendChild(std::cref(heading));
   body.AppendChild(std::cref(table));
+
+  perf.Mark("cpp-end");
+  perf.Measure("cpp", "cpp-start", "cpp-end");
 }

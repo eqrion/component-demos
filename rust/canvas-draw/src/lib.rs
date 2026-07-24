@@ -85,6 +85,8 @@ impl Guest for Component {
         let body = document.get_body().unwrap();
         let perf = get_performance();
 
+        perf.mark("rust-start");
+
         let canvas = document.create_element("canvas");
         canvas.set_attribute("width", &CANVAS_SIZE.to_string());
         canvas.set_attribute("height", &CANVAS_SIZE.to_string());
@@ -120,6 +122,9 @@ impl Guest for Component {
         body.append_child(&heading);
         body.append_child(&canvas);
         body.append_child(&table);
+
+        perf.mark("rust-end");
+        perf.measure("rust", "rust-start", "rust-end");
     }
 }
 

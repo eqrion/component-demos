@@ -87,6 +87,8 @@ impl Guest for Component {
         let body = document.get_body().unwrap();
         let perf = get_performance();
 
+        perf.mark("rust-start");
+
         perf.mark("build-start");
         let root = build_tree(&document, depth, num_children);
         perf.mark("build-end");
@@ -124,6 +126,9 @@ impl Guest for Component {
 
         body.append_child(&heading);
         body.append_child(&table);
+
+        perf.mark("rust-end");
+        perf.measure("rust", "rust-start", "rust-end");
     }
 }
 

@@ -50,6 +50,8 @@ void exports::dom_traversal::Run(int32_t depth, int32_t num_children) {
   dom::HtmlElement body = document.GetBody().value();
   dom::Performance perf = dom::GetPerformance();
 
+  perf.Mark("cpp-start");
+
   perf.Mark("build-start");
   dom::Element root = build_tree(document, depth, num_children);
   perf.Mark("build-end");
@@ -88,4 +90,7 @@ void exports::dom_traversal::Run(int32_t depth, int32_t num_children) {
 
   body.AppendChild(std::cref(heading));
   body.AppendChild(std::cref(table));
+
+  perf.Mark("cpp-end");
+  perf.Measure("cpp", "cpp-start", "cpp-end");
 }

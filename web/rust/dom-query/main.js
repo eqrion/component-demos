@@ -40,6 +40,7 @@ function renderReport(title, rows) {
 }
 
 function runRawJs(count, iterations) {
+  performance.mark("js-start");
   const container = document.createElement("div");
   container.setAttribute("style", "display:none");
   const ids = Array.from({ length: count }, (_, i) => `raw-item-${i}`);
@@ -75,6 +76,9 @@ function runRawJs(count, iterations) {
     ["individual (getElementById)", `${iterations}`, individualMs.toFixed(3), usPerIndividual.toFixed(3)],
     ["bulk (getElementsByClassName)", `${iterations}`, bulkMs.toFixed(3), "n/a"],
   ]);
+
+  performance.mark("js-end");
+  performance.measure("js", "js-start", "js-end");
 }
 
 runRawJs(numElements, iterations);

@@ -44,6 +44,8 @@ static void run(int elements, int iters) {
   val body = document["body"];
   val perf = val::global("performance");
 
+  perf.call<void>("mark", val("emscripten-start"));
+
   uint64_t total_writes = static_cast<uint64_t>(elements) * iters * 4;
 
   std::vector<val> els;
@@ -76,6 +78,9 @@ static void run(int elements, int iters) {
 
   body.call<void>("appendChild", heading);
   body.call<void>("appendChild", table);
+
+  perf.call<void>("mark", val("emscripten-end"));
+  perf.call<val>("measure", val("emscripten"), val("emscripten-start"), val("emscripten-end"));
 }
 
 EMSCRIPTEN_BINDINGS(attribute_churn) { emscripten::function("run", &run); }

@@ -50,6 +50,7 @@ function renderReport(title, rows) {
 }
 
 function runRawJs(depth, numChildren) {
+  performance.mark("js-start");
   performance.mark("build-start");
   const root = buildTree(document, depth, numChildren);
   performance.mark("build-end");
@@ -70,6 +71,9 @@ function runRawJs(depth, numChildren) {
     ["traverse (total)", `${traverseMs.toFixed(3)} ms`],
     ["traverse (per node)", `${usPerNode.toFixed(3)} µs`],
   ]);
+
+  performance.mark("js-end");
+  performance.measure("js", "js-start", "js-end");
 }
 
 runRawJs(depth, numChildren);

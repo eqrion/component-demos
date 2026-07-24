@@ -43,6 +43,8 @@ function buildReport(rows) {
 }
 
 function runRawJs(rowCount) {
+  performance.mark("js-start");
+
   const heading = document.createElement("h2");
   heading.textContent = "Raw JS";
   document.body.appendChild(heading);
@@ -102,6 +104,9 @@ function runRawJs(rowCount) {
     ["update (primes)", updateMs.toFixed(3), ((updateMs * 1_000) / rowCount).toFixed(3), ((updateMs * 1_000) / updated).toFixed(3)],
     ["clear (non-primes)", clearMs.toFixed(3), ((clearMs * 1_000) / rowCount).toFixed(3), ((clearMs * 1_000) / cleared).toFixed(3)],
   ]));
+
+  performance.mark("js-end");
+  performance.measure("js", "js-start", "js-end");
 }
 
 runRawJs(rowCount);

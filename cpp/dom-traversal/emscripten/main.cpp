@@ -53,6 +53,8 @@ static void run(int depth, int num_children) {
   val body = document["body"];
   val perf = val::global("performance");
 
+  perf.call<void>("mark", val("emscripten-start"));
+
   perf.call<void>("mark", val("build-start"));
   val root = build_tree(document, depth, num_children);
   perf.call<void>("mark", val("build-end"));
@@ -78,6 +80,9 @@ static void run(int depth, int num_children) {
 
   body.call<void>("appendChild", heading);
   body.call<void>("appendChild", table);
+
+  perf.call<void>("mark", val("emscripten-end"));
+  perf.call<val>("measure", val("emscripten"), val("emscripten-start"), val("emscripten-end"));
 }
 
 EMSCRIPTEN_BINDINGS(dom_traversal) { emscripten::function("run", &run); }

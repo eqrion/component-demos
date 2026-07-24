@@ -33,6 +33,7 @@ function renderReport(title, canvas, rows) {
 }
 
 function runRawJs(rects) {
+  performance.mark("js-start");
   const canvas = document.createElement("canvas");
   canvas.width = CANVAS_SIZE;
   canvas.height = CANVAS_SIZE;
@@ -54,6 +55,9 @@ function runRawJs(rects) {
     ["total", `${ms.toFixed(3)} ms`],
     ["per fill_rect()", `${usPerCall.toFixed(3)} µs`],
   ]);
+
+  performance.mark("js-end");
+  performance.measure("js", "js-start", "js-end");
 }
 
 runRawJs(rects);

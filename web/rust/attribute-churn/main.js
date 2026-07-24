@@ -35,6 +35,7 @@ function renderReport(title, rows) {
 }
 
 function runRawJs(elementCount, iters) {
+  performance.mark("js-start");
   const elements = Array.from({ length: elementCount }, () => document.createElement("div"));
   const totalWrites = elementCount * iters * ATTRS.length;
 
@@ -55,6 +56,9 @@ function runRawJs(elementCount, iters) {
     ["total time", `${ms.toFixed(3)} ms`],
     ["per setAttribute()", `${usPerWrite.toFixed(3)} µs`],
   ]);
+
+  performance.mark("js-end");
+  performance.measure("js", "js-start", "js-end");
 }
 
 runRawJs(elementCount, iters);

@@ -87,6 +87,8 @@ impl Guest for Component {
         let body = document.get_body().unwrap();
         let perf = get_performance();
 
+        perf.mark("rust-start");
+
         let el = document.create_element("div");
         let min_ms = min_ms.max(1) as f64;
 
@@ -144,6 +146,9 @@ impl Guest for Component {
 
         body.append_child(&heading);
         body.append_child(&table);
+
+        perf.mark("rust-end");
+        perf.measure("rust", "rust-start", "rust-end");
     }
 }
 

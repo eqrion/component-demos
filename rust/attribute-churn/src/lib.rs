@@ -72,6 +72,8 @@ impl Guest for Component {
         let document = get_window().get_document();
         let body = document.get_body().unwrap();
         let perf = get_performance();
+
+        perf.mark("rust-start");
         let total_writes = elements as f64 * iters as f64 * ATTRS.len() as f64;
 
         let elements = build_elements(&document, elements);
@@ -108,6 +110,9 @@ impl Guest for Component {
 
         body.append_child(&heading);
         body.append_child(&table);
+
+        perf.mark("rust-end");
+        perf.measure("rust", "rust-start", "rust-end");
     }
 }
 

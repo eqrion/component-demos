@@ -56,6 +56,7 @@ function renderReport(title, rows) {
 }
 
 function runRawJs(minMs) {
+  performance.mark("js-start");
   const el = document.createElement("div");
   const rows = [];
 
@@ -90,6 +91,9 @@ function runRawJs(minMs) {
   }
 
   renderReport("JavaScript", rows);
+
+  performance.mark("js-end");
+  performance.measure("js", "js-start", "js-end");
 }
 
 runRawJs(minMs);
