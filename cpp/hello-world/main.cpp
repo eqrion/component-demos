@@ -20,7 +20,7 @@ void exports::hello_world::Run() {
   std::array<std::string_view, 2> classes = {"hello", "from-wasm"};
   heading.GetClassList().Add(classes);
 
-  heading.SetTextContent("Hello from Wasm!");
+  heading.SetTextContent("Hello from C++!");
 
   body->AppendChild(std::cref(heading));
 }

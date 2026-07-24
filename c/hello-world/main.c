@@ -27,7 +27,7 @@ void exports_hello_world_run(void) {
       hello_world_borrow_dom_token_list(classes), &token_list);
 
   hello_world_string_t text;
-  hello_world_string_set(&text, "Hello from Wasm!");
+  hello_world_string_set(&text, "Hello from C!");
   hello_world_method_element_set_text_content(
       hello_world_borrow_element(heading), &text);
 

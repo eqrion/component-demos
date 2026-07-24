@@ -55,7 +55,7 @@ impl Guest for Component {
         heading
             .get_class_list()
             .add(&["hello".into(), "from-wasm".into()]);
-        heading.set_text_content("Hello from Wasm!");
+        heading.set_text_content("Hello from Rust!");
 
         body.append_child(&heading);
     }
