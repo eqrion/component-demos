@@ -97,4 +97,5 @@ function runRawJs(minMs) {
 }
 
 runRawJs(minMs);
+await new Promise(res => setTimeout(res, 100));
 run(minMs);

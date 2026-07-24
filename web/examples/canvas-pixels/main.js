@@ -123,4 +123,5 @@ function runRawJs(size, minMs) {
 }
 
 runRawJs(size, minMs);
+await new Promise(res => setTimeout(res, 100));
 run(size, minMs);

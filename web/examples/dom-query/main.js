@@ -82,4 +82,5 @@ function runRawJs(count, iterations) {
 }
 
 runRawJs(numElements, iterations);
+await new Promise(res => setTimeout(res, 100));
 run(numElements, iterations);

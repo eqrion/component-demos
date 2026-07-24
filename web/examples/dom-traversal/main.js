@@ -74,11 +74,13 @@ function runRawJs(depth, numChildren) {
 
 // js
 runRawJs(depth, numChildren);
+await new Promise(res => setTimeout(res, 100));
 
 // c++ (emscripten)
 const { default: createEmscripten } = await import("../../cpp/dom-traversal/emscripten/dom_traversal.mjs");
 const emscripten = await createEmscripten();
 emscripten.run(depth, numChildren);
+await new Promise(res => setTimeout(res, 100));
 
 // rust
 const { run: runRust } = await load({
@@ -86,6 +88,7 @@ const { run: runRust } = await load({
   wasm: new URL("../../rust/dom-traversal/native/dom_traversal.wasm", import.meta.url),
 });
 runRust(depth, numChildren);
+await new Promise(res => setTimeout(res, 100));
 
 // c++ (component)
 const { run: runCpp } = await load({

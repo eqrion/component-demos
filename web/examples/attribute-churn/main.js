@@ -59,11 +59,13 @@ function runRawJs(elementCount, iters) {
 
 // js
 runRawJs(elementCount, iters);
+await new Promise(res => setTimeout(res, 100));
 
 // c++ (emscripten)
 const { default: createEmscripten } = await import("../../cpp/attribute-churn/emscripten/attribute_churn.mjs");
 const emscripten = await createEmscripten();
 emscripten.run(elementCount, iters);
+await new Promise(res => setTimeout(res, 100));
 
 // rust
 const { run: runRust } = await load({
@@ -71,6 +73,7 @@ const { run: runRust } = await load({
   wasm: new URL("../../rust/attribute-churn/native/attribute_churn.wasm", import.meta.url),
 });
 runRust(elementCount, iters);
+await new Promise(res => setTimeout(res, 100));
 
 // c++ (component)
 const { run: runCpp } = await load({

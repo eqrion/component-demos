@@ -61,4 +61,5 @@ function runRawJs(rects) {
 }
 
 runRawJs(rects);
+await new Promise(res => setTimeout(res, 100));
 run(rects);

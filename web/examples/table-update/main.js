@@ -110,4 +110,5 @@ function runRawJs(rowCount) {
 }
 
 runRawJs(rowCount);
+await new Promise(res => setTimeout(res, 100));
 run(rowCount);
