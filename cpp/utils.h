@@ -9,8 +9,10 @@
 // standard library (since this tends to pull in lots of WASI stuff we don't
 // care about.)
 
-// Simple abort handler that just does `unreachable`. (Because we are building
-// with exceptions off, this is thankfully the only thing we need to provide.)
+// Abort handler for libc++'s fallible operations (with exceptions off, this is
+// where std::optional::value() etc. land). Just do a wasm `unreachable`. Inline
+// so it can live in this header; the replacement operator new/delete that std
+// containers need can't be inline, so those live in utils.cpp instead.
 [[noreturn]] inline void std::__libcpp_verbose_abort(const char *,
                                                      ...) noexcept {
   __builtin_trap();
