@@ -1,10 +1,6 @@
 import { init, load } from "../../host/common.js";
 
 init();
-const { run } = await load({
-  jco: () => import("../../rust/canvas-draw/jco/canvas_draw.js"),
-  wasm: new URL("../../rust/canvas-draw/native/canvas_draw.wasm", import.meta.url),
-});
 
 const params = new URLSearchParams(window.location.search);
 const rects = Number(params.get("rects") ?? 20000);
@@ -60,6 +56,35 @@ function runRawJs(rects) {
   performance.measure("js", "js-start", "js-end");
 }
 
+// js
 runRawJs(rects);
 await new Promise(res => setTimeout(res, 100));
-run(rects);
+
+// c++ (emscripten)
+const { default: createEmscripten } = await import("../../cpp/canvas-draw/emscripten/canvas_draw.mjs");
+const emscripten = await createEmscripten();
+emscripten.run(rects);
+await new Promise(res => setTimeout(res, 100));
+
+// rust
+const { run: runRust } = await load({
+  jco: () => import("../../rust/canvas-draw/jco/canvas_draw.js"),
+  wasm: new URL("../../rust/canvas-draw/native/canvas_draw.wasm", import.meta.url),
+});
+runRust(rects);
+await new Promise(res => setTimeout(res, 100));
+
+// c++ (component)
+const { run: runCpp } = await load({
+  jco: () => import("../../cpp/canvas-draw/jco/canvas_draw.js"),
+  wasm: new URL("../../cpp/canvas-draw/native/canvas_draw.wasm", import.meta.url),
+});
+runCpp(rects);
+await new Promise(res => setTimeout(res, 100));
+
+// c (component)
+const { run: runC } = await load({
+  jco: () => import("../../c/canvas-draw/jco/canvas_draw.js"),
+  wasm: new URL("../../c/canvas-draw/native/canvas_draw.wasm", import.meta.url),
+});
+runC(rects);

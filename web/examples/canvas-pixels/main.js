@@ -1,10 +1,6 @@
 import { init, load } from "../../host/common.js";
 
 init();
-const { run } = await load({
-  jco: () => import("../../rust/canvas-pixels/jco/canvas_pixels.js"),
-  wasm: new URL("../../rust/canvas-pixels/native/canvas_pixels.wasm", import.meta.url),
-});
 
 const params = new URLSearchParams(window.location.search);
 const size = Number(params.get("size") ?? 256);
@@ -122,6 +118,35 @@ function runRawJs(size, minMs) {
   performance.measure("js", "js-start", "js-end");
 }
 
+// js
 runRawJs(size, minMs);
 await new Promise(res => setTimeout(res, 100));
-run(size, minMs);
+
+// c++ (emscripten)
+const { default: createEmscripten } = await import("../../cpp/canvas-pixels/emscripten/canvas_pixels.mjs");
+const emscripten = await createEmscripten();
+emscripten.run(size, minMs);
+await new Promise(res => setTimeout(res, 100));
+
+// rust
+const { run: runRust } = await load({
+  jco: () => import("../../rust/canvas-pixels/jco/canvas_pixels.js"),
+  wasm: new URL("../../rust/canvas-pixels/native/canvas_pixels.wasm", import.meta.url),
+});
+runRust(size, minMs);
+await new Promise(res => setTimeout(res, 100));
+
+// c++ (component)
+const { run: runCpp } = await load({
+  jco: () => import("../../cpp/canvas-pixels/jco/canvas_pixels.js"),
+  wasm: new URL("../../cpp/canvas-pixels/native/canvas_pixels.wasm", import.meta.url),
+});
+runCpp(size, minMs);
+await new Promise(res => setTimeout(res, 100));
+
+// c (component)
+const { run: runC } = await load({
+  jco: () => import("../../c/canvas-pixels/jco/canvas_pixels.js"),
+  wasm: new URL("../../c/canvas-pixels/native/canvas_pixels.wasm", import.meta.url),
+});
+runC(size, minMs);
