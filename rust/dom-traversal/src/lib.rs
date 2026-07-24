@@ -85,14 +85,21 @@ impl Guest for Component {
     fn run(depth: i32, num_children: i32) {
         let document = get_window().get_document();
         let body = document.get_body().unwrap();
+        let perf = get_performance();
 
-        let build_start = now();
+        perf.mark("build-start");
         let root = build_tree(&document, depth, num_children);
-        let build_ms = now() - build_start;
+        perf.mark("build-end");
+        let build_ms = perf
+            .measure("build", "build-start", "build-end")
+            .get_duration();
 
-        let traverse_start = now();
+        perf.mark("traverse-start");
         let node_total = traverse(Some(&root)) as u64;
-        let traverse_ms = now() - traverse_start;
+        perf.mark("traverse-end");
+        let traverse_ms = perf
+            .measure("traverse", "traverse-start", "traverse-end")
+            .get_duration();
 
         let us_per_node = (traverse_ms * 1_000.0) / node_total as f64;
 

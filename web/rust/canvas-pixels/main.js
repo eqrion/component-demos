@@ -18,9 +18,10 @@ const MAX_REPS = 1 << 20;
 function measure(minMs, run) {
   let reps = 1;
   for (;;) {
-    const start = performance.now();
+    performance.mark("measure-start");
     run(reps);
-    const elapsed = performance.now() - start;
+    performance.mark("measure-end");
+    const elapsed = performance.measure("measure", "measure-start", "measure-end").duration;
     if (elapsed >= minMs || reps >= MAX_REPS) {
       return [reps, elapsed];
     }

@@ -65,12 +65,15 @@ fn append_row(document: &Document, table: &Element, cell_tag: &str, cells: &[Str
 // Autoranging timer: doubles the rep count until at least `min_ms` has
 // elapsed, so cheap ops (need many reps to clear timer resolution) and
 // expensive ops (need few) both get a trustworthy measurement.
-fn measure(min_ms: f64, mut run: impl FnMut(u64)) -> (u64, f64) {
+fn measure(perf: &Performance, min_ms: f64, mut run: impl FnMut(u64)) -> (u64, f64) {
     let mut reps: u64 = 100;
     loop {
-        let start = now();
+        perf.mark("measure-start");
         run(reps);
-        let elapsed = now() - start;
+        perf.mark("measure-end");
+        let elapsed = perf
+            .measure("measure", "measure-start", "measure-end")
+            .get_duration();
         if elapsed >= min_ms || reps >= MAX_REPS {
             return (reps, elapsed);
         }
@@ -82,6 +85,7 @@ impl Guest for Component {
     fn run(min_ms: u32) {
         let document = get_window().get_document();
         let body = document.get_body().unwrap();
+        let perf = get_performance();
 
         let el = document.create_element("div");
         let min_ms = min_ms.max(1) as f64;
@@ -108,12 +112,12 @@ impl Guest for Component {
             el.set_text_content(&value);
             debug_assert_eq!(el.get_text_content().len(), size);
 
-            let (set_reps, set_ms) = measure(min_ms, |reps| {
+            let (set_reps, set_ms) = measure(&perf, min_ms, |reps| {
                 for _ in 0..reps {
                     el.set_text_content(&value);
                 }
             });
-            let (get_reps, get_ms) = measure(min_ms, |reps| {
+            let (get_reps, get_ms) = measure(&perf, min_ms, |reps| {
                 for _ in 0..reps {
                     let _ = el.get_text_content();
                 }

@@ -71,10 +71,11 @@ impl Guest for Component {
     fn run(elements: u32, iters: u32) {
         let document = get_window().get_document();
         let body = document.get_body().unwrap();
+        let perf = get_performance();
         let total_writes = elements as f64 * iters as f64 * ATTRS.len() as f64;
 
         let elements = build_elements(&document, elements);
-        let start = now();
+        perf.mark("run-start");
         for i in 0..iters {
             for el in &elements {
                 for (j, name) in ATTRS.iter().enumerate() {
@@ -82,7 +83,8 @@ impl Guest for Component {
                 }
             }
         }
-        let total_ms = now() - start;
+        perf.mark("run-end");
+        let total_ms = perf.measure("run", "run-start", "run-end").get_duration();
 
         let us_per_element = total_ms * 1_000.0 / total_writes;
 

@@ -6,9 +6,12 @@ export let HtmlElement = globalThis.HTMLElement;
 export let Node = globalThis.Node;
 export let Text = globalThis.Text;
 export let Window = globalThis.Window;
+export let PerformanceMark = globalThis.PerformanceMark;
+export let PerformanceMeasure = globalThis.PerformanceMeasure;
+export let Performance = globalThis.Performance;
 
 export let getWindow = () => globalThis;
-export let now = () => performance.now();
+export let getPerformance = () => globalThis.performance;
 
 function getPropertyDescriptor(constructor, name) {
     let proto = constructor.prototype;
@@ -56,3 +59,6 @@ CanvasRenderingContext2D.prototype.putImageDataArrayBuffer = function (data, x, 
 let fillStyle = getPropertyDescriptor(CanvasRenderingContext2D, "fillStyle");
 CanvasRenderingContext2D.prototype.getFillStyle = fillStyle.get;
 CanvasRenderingContext2D.prototype.setFillStyle = fillStyle.set;
+
+let duration = getPropertyDescriptor(PerformanceMeasure, "duration");
+PerformanceMeasure.prototype.getDuration = duration.get;

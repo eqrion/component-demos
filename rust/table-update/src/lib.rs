@@ -79,6 +79,7 @@ impl Guest for Component {
     fn run(row_count: u32) {
         let document = get_window().get_document();
         let body = document.get_body().unwrap();
+        let perf = get_performance();
 
         let heading = document.create_element("h2");
         heading.set_text_content("Wasm component (Rust)");
@@ -96,7 +97,7 @@ impl Guest for Component {
         table_el.append_child(&tbody);
         toggle.append_child(&table_el);
 
-        let create_start = now();
+        perf.mark("create-start");
         let mut rows = Vec::with_capacity(row_count as usize);
         for i in 1..=row_count {
             let tr = document.create_element("tr");
@@ -106,9 +107,12 @@ impl Guest for Component {
             tbody.append_child(&tr);
             rows.push((tr, td));
         }
-        let create_ms = now() - create_start;
+        perf.mark("create-end");
+        let create_ms = perf
+            .measure("create", "create-start", "create-end")
+            .get_duration();
 
-        let update_start = now();
+        perf.mark("update-start");
         let mut updated: u32 = 0;
         for (i, (tr, td)) in rows.iter().enumerate() {
             let i = i + 1;
@@ -118,9 +122,12 @@ impl Guest for Component {
                 updated += 1;
             }
         }
-        let update_ms = now() - update_start;
+        perf.mark("update-end");
+        let update_ms = perf
+            .measure("update", "update-start", "update-end")
+            .get_duration();
 
-        let clear_start = now();
+        perf.mark("clear-start");
         let mut cleared: u32 = 0;
         for (tr, _) in &rows {
             if tr.get_attribute("data-prime").is_none() {
@@ -128,7 +135,10 @@ impl Guest for Component {
                 cleared += 1;
             }
         }
-        let clear_ms = now() - clear_start;
+        perf.mark("clear-end");
+        let clear_ms = perf
+            .measure("clear", "clear-start", "clear-end")
+            .get_duration();
 
         let report = document.create_element("table");
         let header = document.create_element("tr");

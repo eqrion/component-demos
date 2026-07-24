@@ -21,9 +21,18 @@ world canvas-draw {
   resource window {
     get-document: func() -> document;
   }
+  resource performance-mark {}
+  resource performance-measure {
+    get-duration: func() -> f64;
+  }
+  resource performance {
+    now: func() -> f64;
+    mark: func(mark-name: string) -> performance-mark;
+    measure: func(measure-name: string, start-mark: string, end-mark: string) -> performance-measure;
+  }
 
   import get-window: func() -> window;
-  import now: func() -> f64;
+  import get-performance: func() -> performance;
 
   export run: func(rects: u32);
 }

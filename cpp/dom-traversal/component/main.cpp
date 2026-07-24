@@ -48,14 +48,19 @@ void exports::dom_traversal::Run(int32_t depth, int32_t num_children) {
   dom::Window window = dom::GetWindow();
   dom::Document document = window.GetDocument();
   dom::HtmlElement body = document.GetBody().value();
+  dom::Performance perf = dom::GetPerformance();
 
-  double build_start = dom::Now();
+  perf.Mark("build-start");
   dom::Element root = build_tree(document, depth, num_children);
-  double build_ms = dom::Now() - build_start;
+  perf.Mark("build-end");
+  double build_ms =
+      perf.Measure("build", "build-start", "build-end").GetDuration();
 
-  double traverse_start = dom::Now();
+  perf.Mark("traverse-start");
   uint32_t node_total = traverse(root);
-  double traverse_ms = dom::Now() - traverse_start;
+  perf.Mark("traverse-end");
+  double traverse_ms =
+      perf.Measure("traverse", "traverse-start", "traverse-end").GetDuration();
 
   double us_per_node = (traverse_ms * 1000.0) / static_cast<double>(node_total);
 

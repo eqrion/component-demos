@@ -83,6 +83,7 @@ impl Guest for Component {
     fn run(rects: u32) {
         let document = get_window().get_document();
         let body = document.get_body().unwrap();
+        let perf = get_performance();
 
         let canvas = document.create_element("canvas");
         canvas.set_attribute("width", &CANVAS_SIZE.to_string());
@@ -90,14 +91,17 @@ impl Guest for Component {
         let ctx = canvas.get_context2d();
         ctx.set_fill_style("steelblue");
 
-        let start = now();
-        let mut state = now() as u32;
+        perf.mark("draw-start");
+        let mut state = perf.now() as u32;
         for _ in 0..rects {
             let x = rand(&mut state) * (CANVAS_SIZE - RECT_SIZE);
             let y = rand(&mut state) * (CANVAS_SIZE - RECT_SIZE);
             ctx.fill_rect(x, y, RECT_SIZE, RECT_SIZE);
         }
-        let ms = now() - start;
+        perf.mark("draw-end");
+        let ms = perf
+            .measure("draw", "draw-start", "draw-end")
+            .get_duration();
         let us_per_call = ms * 1_000.0 / rects as f64;
 
         let heading = document.create_element("h2");

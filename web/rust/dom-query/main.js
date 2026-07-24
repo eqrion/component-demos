@@ -53,19 +53,21 @@ function runRawJs(count, iterations) {
 
   const numIndividualLookups = count * iterations;
 
-  const individualStart = performance.now();
+  performance.mark("individual-start");
   for (let i = 0; i < iterations; i++) {
     for (const id of ids) {
       document.getElementById(id);
     }
   }
-  const individualMs = performance.now() - individualStart;
+  performance.mark("individual-end");
+  const individualMs = performance.measure("individual", "individual-start", "individual-end").duration;
 
-  const bulkStart = performance.now();
+  performance.mark("bulk-start");
   for (let i = 0; i < iterations; i++) {
     document.getElementsByClassName("raw-item");
   }
-  const bulkMs = performance.now() - bulkStart;
+  performance.mark("bulk-end");
+  const bulkMs = performance.measure("bulk", "bulk-start", "bulk-end").duration;
 
   const usPerIndividual = (individualMs * 1_000) / numIndividualLookups;
 

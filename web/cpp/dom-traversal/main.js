@@ -48,13 +48,15 @@ function renderReport(title, rows) {
 }
 
 function runRawJs(depth, numChildren) {
-  const buildStart = performance.now();
+  performance.mark("build-start");
   const root = buildTree(document, depth, numChildren);
-  const buildMs = performance.now() - buildStart;
+  performance.mark("build-end");
+  const buildMs = performance.measure("build", "build-start", "build-end").duration;
 
-  const traverseStart = performance.now();
+  performance.mark("traverse-start");
   const nodeTotal = traverse(root);
-  const traverseMs = performance.now() - traverseStart;
+  performance.mark("traverse-end");
+  const traverseMs = performance.measure("traverse", "traverse-start", "traverse-end").duration;
 
   const usPerNode = (traverseMs * 1_000) / nodeTotal;
 

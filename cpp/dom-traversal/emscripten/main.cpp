@@ -1,5 +1,4 @@
 #include <emscripten/bind.h>
-#include <emscripten/emscripten.h> // emscripten_get_now
 #include <emscripten/val.h>
 
 #include <cstdio>
@@ -43,17 +42,26 @@ static void append_row(const val &document, const val &table,
   table.call<void>("appendChild", row);
 }
 
+static double measure(const val &perf, const char *name, const char *start,
+                      const char *end) {
+  return perf.call<val>("measure", val(name), val(start), val(end))["duration"]
+      .as<double>();
+}
+
 static void run(int depth, int num_children) {
   val document = val::global("document");
   val body = document["body"];
+  val perf = val::global("performance");
 
-  double build_start = emscripten_get_now();
+  perf.call<void>("mark", val("build-start"));
   val root = build_tree(document, depth, num_children);
-  double build_ms = emscripten_get_now() - build_start;
+  perf.call<void>("mark", val("build-end"));
+  double build_ms = measure(perf, "build", "build-start", "build-end");
 
-  double traverse_start = emscripten_get_now();
+  perf.call<void>("mark", val("traverse-start"));
   unsigned node_total = traverse(root);
-  double traverse_ms = emscripten_get_now() - traverse_start;
+  perf.call<void>("mark", val("traverse-end"));
+  double traverse_ms = measure(perf, "traverse", "traverse-start", "traverse-end");
 
   double us_per_node = (traverse_ms * 1000.0) / static_cast<double>(node_total);
 

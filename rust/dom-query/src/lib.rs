@@ -71,6 +71,7 @@ impl Guest for Component {
     fn run(num_elements: u32, iterations: u32) {
         let document = get_window().get_document();
         let body = document.get_body().unwrap();
+        let perf = get_performance();
 
         // Generate N elements to query for
         let container = document.create_element("div");
@@ -85,19 +86,25 @@ impl Guest for Component {
         body.append_child(&container);
 
         let num_individual_lookups = num_elements as f64 * iterations as f64;
-        let individual_start = now();
+        perf.mark("individual-start");
         for _ in 0..iterations {
             for id in &ids {
                 let _ = document.get_element_by_id(id);
             }
         }
-        let individual_ms = now() - individual_start;
+        perf.mark("individual-end");
+        let individual_ms = perf
+            .measure("individual", "individual-start", "individual-end")
+            .get_duration();
 
-        let bulk_start = now();
+        perf.mark("bulk-start");
         for _ in 0..iterations {
             let _ = document.get_elements_by_class_name_list("rust-item");
         }
-        let bulk_ms = now() - bulk_start;
+        perf.mark("bulk-end");
+        let bulk_ms = perf
+            .measure("bulk", "bulk-start", "bulk-end")
+            .get_duration();
 
         let us_per_individual = individual_ms * 1_000.0 / num_individual_lookups;
 

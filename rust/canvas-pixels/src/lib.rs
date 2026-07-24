@@ -79,12 +79,15 @@ fn checker(
 // Same autoranging timer as string-marshalling: double reps until at
 // least `min_ms` has elapsed, so both directions get a trustworthy
 // measurement regardless of canvas size.
-fn measure(min_ms: u32, mut run: impl FnMut(u64)) -> (u64, f64) {
+fn measure(perf: &Performance, min_ms: u32, mut run: impl FnMut(u64)) -> (u64, f64) {
     let mut reps: u64 = 1;
     loop {
-        let start = now();
+        perf.mark("measure-start");
         run(reps);
-        let elapsed = now() - start;
+        perf.mark("measure-end");
+        let elapsed = perf
+            .measure("measure", "measure-start", "measure-end")
+            .get_duration();
         if elapsed >= min_ms as f64 || reps >= MAX_REPS {
             return (reps, elapsed);
         }
@@ -109,6 +112,7 @@ impl Guest for Component {
     fn run(size: u32, min_ms: u32) {
         let document = get_window().get_document();
         let body = document.get_body().unwrap();
+        let perf = get_performance();
 
         let heading = document.create_element("h2");
         heading.set_text_content("Wasm component (Rust)");
@@ -137,7 +141,7 @@ impl Guest for Component {
         const MARGIN: u32 = 40;
         let mut pixels = vec![];
 
-        let (get_reps, get_ms) = measure(min_ms, |reps| {
+        let (get_reps, get_ms) = measure(&perf, min_ms, |reps| {
             for _ in 0..reps {
                 pixels = ctx1.get_image_data_array_buffer(
                     MARGIN as f64,
@@ -148,7 +152,7 @@ impl Guest for Component {
             }
         });
         let byte_len = pixels.len();
-        let (put_reps, put_ms) = measure(min_ms, |reps| {
+        let (put_reps, put_ms) = measure(&perf, min_ms, |reps| {
             for _ in 0..reps {
                 ctx2.put_image_data_array_buffer(
                     &pixels,

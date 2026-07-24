@@ -27,6 +27,7 @@ void exports::attribute_churn::Run(uint32_t elements, uint32_t iters) {
   dom::Window window = dom::GetWindow();
   dom::Document document = window.GetDocument();
   dom::HtmlElement body = document.GetBody().value();
+  dom::Performance perf = dom::GetPerformance();
 
   uint64_t total_writes = static_cast<uint64_t>(elements) * iters * 4;
 
@@ -36,7 +37,7 @@ void exports::attribute_churn::Run(uint32_t elements, uint32_t iters) {
     els.push_back(document.CreateElement("div"));
   }
 
-  double start = dom::Now();
+  perf.Mark("run-start");
   for (uint32_t i = 0; i < iters; i++) {
     for (const dom::Element &el : els) {
       for (uint32_t j = 0; j < 4; j++) {
@@ -48,7 +49,8 @@ void exports::attribute_churn::Run(uint32_t elements, uint32_t iters) {
       }
     }
   }
-  double total_ms = dom::Now() - start;
+  perf.Mark("run-end");
+  double total_ms = perf.Measure("run", "run-start", "run-end").GetDuration();
 
   double us_per = total_ms * 1000.0 / static_cast<double>(total_writes);
 

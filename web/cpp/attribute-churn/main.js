@@ -36,7 +36,7 @@ function runRawJs(elementCount, iters) {
   const elements = Array.from({ length: elementCount }, () => document.createElement("div"));
   const totalWrites = elementCount * iters * ATTRS.length;
 
-  const start = performance.now();
+  performance.mark("run-start");
   for (let i = 0; i < iters; i++) {
     for (const el of elements) {
       for (const [j, name] of ATTRS.entries()) {
@@ -44,7 +44,8 @@ function runRawJs(elementCount, iters) {
       }
     }
   }
-  const ms = performance.now() - start;
+  performance.mark("run-end");
+  const ms = performance.measure("run", "run-start", "run-end").duration;
   const usPerWrite = (ms * 1_000) / totalWrites;
 
   renderReport("Raw JS", [

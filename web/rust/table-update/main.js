@@ -59,7 +59,7 @@ function runRawJs(rowCount) {
   tableEl.appendChild(tbody);
   toggle.appendChild(tableEl);
 
-  const createStart = performance.now();
+  performance.mark("create-start");
   const rows = [];
   for (let i = 1; i <= rowCount; i++) {
     const tr = document.createElement("tr");
@@ -69,9 +69,10 @@ function runRawJs(rowCount) {
     tbody.appendChild(tr);
     rows.push([tr, td]);
   }
-  const createMs = performance.now() - createStart;
+  performance.mark("create-end");
+  const createMs = performance.measure("create", "create-start", "create-end").duration;
 
-  const updateStart = performance.now();
+  performance.mark("update-start");
   let updated = 0;
   for (let idx = 0; idx < rows.length; idx++) {
     const i = idx + 1;
@@ -82,9 +83,10 @@ function runRawJs(rowCount) {
       updated++;
     }
   }
-  const updateMs = performance.now() - updateStart;
+  performance.mark("update-end");
+  const updateMs = performance.measure("update", "update-start", "update-end").duration;
 
-  const clearStart = performance.now();
+  performance.mark("clear-start");
   let cleared = 0;
   for (const [tr] of rows) {
     if (tr.getAttribute("data-prime") === null) {
@@ -92,7 +94,8 @@ function runRawJs(rowCount) {
       cleared++;
     }
   }
-  const clearMs = performance.now() - clearStart;
+  performance.mark("clear-end");
+  const clearMs = performance.measure("clear", "clear-start", "clear-end").duration;
 
   document.body.appendChild(buildReport([
     ["create", createMs.toFixed(3), ((createMs * 1_000) / rowCount).toFixed(3), "-"],

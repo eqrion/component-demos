@@ -27,7 +27,10 @@ host="../../../host/web-host.js"
     --map trusted-script-url="$host#TrustedScriptUrl" \
     --map window="$host#Window" \
     --map get-window="$host#getWindow" \
-    --map now="$host#now" \
+    --map get-performance="$host#getPerformance" \
+    --map performance-mark="$host#PerformanceMark" \
+    --map performance-measure="$host#PerformanceMeasure" \
+    --map performance="$host#Performance" \
     -o "$outdir"
 
 # Emit a .wat next to each core wasm as a debugging aid (needs wasm-tools).

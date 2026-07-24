@@ -39,13 +39,14 @@ function runRawJs(rects) {
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = "indianred";
 
-  const start = performance.now();
+  performance.mark("draw-start");
   for (let i = 0; i < rects; i++) {
     const x = Math.random() * (CANVAS_SIZE - RECT_SIZE);
     const y = Math.random() * (CANVAS_SIZE - RECT_SIZE);
     ctx.fillRect(x, y, RECT_SIZE, RECT_SIZE);
   }
-  const ms = performance.now() - start;
+  performance.mark("draw-end");
+  const ms = performance.measure("draw", "draw-start", "draw-end").duration;
   const usPerCall = (ms * 1_000) / rects;
 
   renderReport("Raw JS", canvas, [

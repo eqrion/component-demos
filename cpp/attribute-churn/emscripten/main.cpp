@@ -4,7 +4,6 @@
 // boundary through Emscripten's JS glue via emscripten::val. Mirrors
 // rust/attribute-churn.
 #include <emscripten/bind.h>
-#include <emscripten/emscripten.h>  // emscripten_get_now
 #include <emscripten/val.h>
 
 #include <cstdint>
@@ -34,9 +33,16 @@ static void append_row(const val &document, const val &table,
   table.call<void>("appendChild", row);
 }
 
+static double measure(const val &perf, const char *name, const char *start,
+                      const char *end) {
+  return perf.call<val>("measure", val(name), val(start), val(end))["duration"]
+      .as<double>();
+}
+
 static void run(int elements, int iters) {
   val document = val::global("document");
   val body = document["body"];
+  val perf = val::global("performance");
 
   uint64_t total_writes = static_cast<uint64_t>(elements) * iters * 4;
 
@@ -46,7 +52,7 @@ static void run(int elements, int iters) {
     els.push_back(document.call<val>("createElement", val("div")));
   }
 
-  double start = emscripten_get_now();
+  perf.call<void>("mark", val("run-start"));
   for (int i = 0; i < iters; i++) {
     for (val &el : els) {
       for (int j = 0; j < 4; j++) {
@@ -55,7 +61,8 @@ static void run(int elements, int iters) {
       }
     }
   }
-  double total_ms = emscripten_get_now() - start;
+  perf.call<void>("mark", val("run-end"));
+  double total_ms = measure(perf, "run", "run-start", "run-end");
 
   double us_per = total_ms * 1000.0 / static_cast<double>(total_writes);
 
