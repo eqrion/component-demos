@@ -14,6 +14,7 @@ outdir="$2"
 host="../../../host/web-host.js"
 
 ./node_modules/.bin/jco transpile "$component" \
+    --no-nodejs-compat \
     --map document="$host#Document" \
     --map dom-token-list="$host#DomTokenList" \
     --map canvas-rendering-context2d="$host#CanvasRenderingContext2d" \
@@ -27,8 +28,6 @@ host="../../../host/web-host.js"
     --map window="$host#Window" \
     --map get-window="$host#getWindow" \
     --map now="$host#now" \
-    --map element-as-node="$host#elementAsNode" \
-    --map text-as-node="$host#textAsNode" \
     -o "$outdir"
 
 # Emit a .wat next to each core wasm as a debugging aid (needs wasm-tools).

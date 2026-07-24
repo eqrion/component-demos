@@ -32,6 +32,7 @@ Node.prototype.setNextSibling = nextSibling.set;
 let textContent = getPropertyDescriptor(Node, "textContent");
 Node.prototype.getTextContent = textContent.get;
 Node.prototype.setTextContent = textContent.set;
+Node.prototype.appendText = Node.prototype.appendChild;
 
 let classList = getPropertyDescriptor(Element, "classList");
 Element.prototype.getClassList = classList.get;

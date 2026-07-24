@@ -77,7 +77,7 @@ fn set_attr(element: &Element, name: &str, value: &str) {
 }
 
 fn append_child(parent: &Element, child: &Element) {
-    parent.append_child(&element_as_node(child));
+    parent.append_child(child);
 }
 
 fn set_text(element: &Element, text: &str) {
@@ -86,7 +86,7 @@ fn set_text(element: &Element, text: &str) {
 
 fn append_text_node(document: &Document, parent: &Element, text: &str) {
     let node = document.create_text_node(text);
-    parent.append_child(&text_as_node(&node));
+    parent.append_text(&node);
 }
 
 fn build_todo_item(document: &Document, todo: &Todo) -> Element {
@@ -214,7 +214,7 @@ impl Guest for Component {
         set_text(&clear_completed, "Clear completed");
         append_child(&footer, &clear_completed);
 
-        body.append_child(&element_as_node(&root));
+        body.append_child(&root);
     }
 }
 

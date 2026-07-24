@@ -7,14 +7,13 @@ world todomvc {
     create-text-node: func(data: string) -> text;
   }
   resource element {
-    append-child: func(node: borrow<node>) -> node;
+    append-child: func(child: borrow<element>);
+    append-text: func(child: borrow<text>);
     set-attribute: func(qualified-name: string, value: string);
     set-text-content: func(value: string);
   }
   resource html-element {
-    append-child: func(node: borrow<node>) -> node;
-  }
-  resource node {
+    append-child: func(child: borrow<element>);
   }
   resource text {
   }
@@ -23,9 +22,6 @@ world todomvc {
   }
 
   import get-window: func() -> window;
-
-  import element-as-node: func(v: borrow<element>) -> node;
-  import text-as-node: func(v: borrow<text>) -> node;
 
   export run: func();
 }
