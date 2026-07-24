@@ -4,9 +4,6 @@ cd "$(dirname "$0")"
 
 webdir="c/dom-traversal"
 wasm="dom_traversal"
-# Rename the world in the generated C so every symbol is prefixed `dt_` instead
-# of the unwieldy `dom_traversal_`. This only affects the generated source and
-# its filenames; the component's actual interface still comes from the WIT.
 bind="dt"
 
 sdk="../../_wasi-sdk"
