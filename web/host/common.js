@@ -302,3 +302,14 @@ export function getTableRowValuesByName(table, name) {
   }
   return res;
 }
+
+// The data-cell texts (header row excluded) of the column whose header === name,
+// for tables that put their column labels in the first row.
+export function getTableColumnValuesByName(table, name) {
+  const rows = Array.from(table.querySelectorAll("tr"));
+  const col = Array.from(rows[0].children).findIndex(c => c.textContent === name);
+  if (col < 0) {
+    throw new Error(`no column found with name ${name}`);
+  }
+  return rows.slice(1).map(row => row.children[col].textContent);
+}

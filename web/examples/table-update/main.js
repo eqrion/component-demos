@@ -1,6 +1,4 @@
-import { init, load } from "../../host/common.js";
-
-const params = init();
+import { init, load, parseDuration, getTableColumnValuesByName } from "../../host/common.js";
 
 function isPrime(n) {
   for (let i = 2; i <= Math.floor(n / 2); i++) {
@@ -100,35 +98,79 @@ function runRawJs(rowCount) {
   performance.measure("js", "js-start", "js-end");
 }
 
-// js
-runRawJs(params.rows);
-await new Promise(res => setTimeout(res, 100));
+async function runAll(params) {
+  const delay = 50;
 
-// c++ (emscripten)
-const { default: createEmscripten } = await import("../../cpp/table-update/emscripten/table_update.mjs");
-const emscripten = await createEmscripten();
-emscripten.run(params.rows);
-await new Promise(res => setTimeout(res, 100));
+  // js
+  runRawJs(params.rows);
+  await new Promise(res => setTimeout(res, delay));
 
-// rust
-const { run: runRust } = await load({
-  jco: () => import("../../rust/table-update/jco/table_update.js"),
-  wasm: new URL("../../rust/table-update/native/table_update.wasm", import.meta.url),
-});
-runRust(params.rows);
-await new Promise(res => setTimeout(res, 100));
+  // c++ (emscripten)
+  const { default: createEmscripten } = await import("../../cpp/table-update/emscripten/table_update.mjs");
+  const emscripten = await createEmscripten();
+  emscripten.run(params.rows);
+  await new Promise(res => setTimeout(res, delay));
 
-// c++ (component)
-const { run: runCpp } = await load({
-  jco: () => import("../../cpp/table-update/jco/table_update.js"),
-  wasm: new URL("../../cpp/table-update/native/table_update.wasm", import.meta.url),
-});
-runCpp(params.rows);
-await new Promise(res => setTimeout(res, 100));
+  // rust
+  const { run: runRust } = await load({
+    jco: () => import("../../rust/table-update/jco/table_update.js"),
+    wasm: new URL("../../rust/table-update/native/table_update.wasm", import.meta.url),
+  });
+  runRust(params.rows);
+  await new Promise(res => setTimeout(res, delay));
 
-// c (component)
-const { run: runC } = await load({
-  jco: () => import("../../c/table-update/jco/table_update.js"),
-  wasm: new URL("../../c/table-update/native/table_update.wasm", import.meta.url),
-});
-runC(params.rows);
+  // c++ (component)
+  const { run: runCpp } = await load({
+    jco: () => import("../../cpp/table-update/jco/table_update.js"),
+    wasm: new URL("../../cpp/table-update/native/table_update.wasm", import.meta.url),
+  });
+  runCpp(params.rows);
+  await new Promise(res => setTimeout(res, delay));
+
+  // c (component)
+  const { run: runC } = await load({
+    jco: () => import("../../c/table-update/jco/table_update.js"),
+    wasm: new URL("../../c/table-update/native/table_update.wasm", import.meta.url),
+  });
+  runC(params.rows);
+  await new Promise(res => setTimeout(res, delay));
+}
+
+function clear() {
+  let next = document.querySelector("body script").nextSibling;
+  while (next) {
+    const toRemove = next;
+    next = next.nextSibling;
+    toRemove.remove();
+  }
+}
+
+// A <details> with the live row table sits between the heading and the metrics
+// table, so walk forward to the first sibling table.
+function metricsTable(heading) {
+  let el = heading.nextElementSibling;
+  while (el && el.tagName !== "TABLE") {
+    el = el.nextElementSibling;
+  }
+  return el;
+}
+
+function getMeasurements() {
+  const measurements = {};
+  for (const heading of document.querySelectorAll("h2")) {
+    const table = metricsTable(heading);
+    const phases = getTableColumnValuesByName(table, "phase");
+    const totalMs = getTableColumnValuesByName(table, "total ms");
+    const usRow = getTableColumnValuesByName(table, "µs/row");
+    const m = {};
+    for (const phase of ["create", "update (primes)", "clear (non-primes)"]) {
+      const i = phases.indexOf(phase);
+      m[`${phase}: total ms`] = parseDuration(`${totalMs[i]} ms`);
+      m[`${phase}: µs/row`] = parseDuration(`${usRow[i]} µs`);
+    }
+    measurements[heading.textContent] = m;
+  }
+  return measurements;
+}
+
+init(runAll, 10, clear, getMeasurements);

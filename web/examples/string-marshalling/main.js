@@ -1,10 +1,4 @@
-import { init, load } from "../../host/common.js";
-
-const params = init();
-const { run } = await load({
-  jco: () => import("../../rust/string-marshalling/jco/string_marshalling.js"),
-  wasm: new URL("../../rust/string-marshalling/native/string_marshalling.wasm", import.meta.url),
-});
+import { init, load, parseDuration, getTableColumnValuesByName } from "../../host/common.js";
 
 const SIZES = [8, 128, 1024, 16384, 262144];
 const MAX_REPS = 1 << 24;
@@ -93,6 +87,46 @@ function runRawJs(minMs) {
   performance.measure("js", "js-start", "js-end");
 }
 
-runRawJs(params.ms);
-await new Promise(res => setTimeout(res, 100));
-run(params.ms);
+async function runAll(params) {
+  const delay = 50;
+
+  // js
+  runRawJs(params.ms);
+  await new Promise(res => setTimeout(res, delay));
+
+  // rust
+  const { run } = await load({
+    jco: () => import("../../rust/string-marshalling/jco/string_marshalling.js"),
+    wasm: new URL("../../rust/string-marshalling/native/string_marshalling.wasm", import.meta.url),
+  });
+  run(params.ms);
+  await new Promise(res => setTimeout(res, delay));
+}
+
+function clear() {
+  let next = document.querySelector("body script").nextSibling;
+  while (next) {
+    const toRemove = next;
+    next = next.nextSibling;
+    toRemove.remove();
+  }
+}
+
+function getMeasurements() {
+  const measurements = {};
+  for (const heading of document.querySelectorAll("h2")) {
+    const table = heading.nextElementSibling;
+    const sizes = getTableColumnValuesByName(table, "size");
+    const setUs = getTableColumnValuesByName(table, "set µs/call");
+    const getUs = getTableColumnValuesByName(table, "get µs/call");
+    const m = {};
+    sizes.forEach((s, i) => {
+      m[`set ${s}`] = parseDuration(`${setUs[i]} µs`);
+      m[`get ${s}`] = parseDuration(`${getUs[i]} µs`);
+    });
+    measurements[heading.textContent] = m;
+  }
+  return measurements;
+}
+
+init(runAll, 10, clear, getMeasurements);

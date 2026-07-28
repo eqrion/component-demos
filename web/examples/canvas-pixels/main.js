@@ -1,6 +1,5 @@
-import { init, load } from "../../host/common.js";
+import { init, load, parseDuration, getTableColumnValuesByName } from "../../host/common.js";
 
-const params = init();
 const minMs = 10;
 
 const MAX_REPS = 1 << 20;
@@ -115,35 +114,77 @@ function runRawJs(size, minMs) {
   performance.measure("js", "js-start", "js-end");
 }
 
-// js
-runRawJs(params.size, minMs);
-await new Promise(res => setTimeout(res, 100));
+async function runAll(params) {
+  const delay = 50;
 
-// c++ (emscripten)
-const { default: createEmscripten } = await import("../../cpp/canvas-pixels/emscripten/canvas_pixels.mjs");
-const emscripten = await createEmscripten();
-emscripten.run(params.size, minMs);
-await new Promise(res => setTimeout(res, 100));
+  // js
+  runRawJs(params.size, minMs);
+  await new Promise(res => setTimeout(res, delay));
 
-// rust
-const { run: runRust } = await load({
-  jco: () => import("../../rust/canvas-pixels/jco/canvas_pixels.js"),
-  wasm: new URL("../../rust/canvas-pixels/native/canvas_pixels.wasm", import.meta.url),
-});
-runRust(params.size, minMs);
-await new Promise(res => setTimeout(res, 100));
+  // c++ (emscripten)
+  const { default: createEmscripten } = await import("../../cpp/canvas-pixels/emscripten/canvas_pixels.mjs");
+  const emscripten = await createEmscripten();
+  emscripten.run(params.size, minMs);
+  await new Promise(res => setTimeout(res, delay));
 
-// c++ (component)
-const { run: runCpp } = await load({
-  jco: () => import("../../cpp/canvas-pixels/jco/canvas_pixels.js"),
-  wasm: new URL("../../cpp/canvas-pixels/native/canvas_pixels.wasm", import.meta.url),
-});
-runCpp(params.size, minMs);
-await new Promise(res => setTimeout(res, 100));
+  // rust
+  const { run: runRust } = await load({
+    jco: () => import("../../rust/canvas-pixels/jco/canvas_pixels.js"),
+    wasm: new URL("../../rust/canvas-pixels/native/canvas_pixels.wasm", import.meta.url),
+  });
+  runRust(params.size, minMs);
+  await new Promise(res => setTimeout(res, delay));
 
-// c (component)
-const { run: runC } = await load({
-  jco: () => import("../../c/canvas-pixels/jco/canvas_pixels.js"),
-  wasm: new URL("../../c/canvas-pixels/native/canvas_pixels.wasm", import.meta.url),
-});
-runC(params.size, minMs);
+  // c++ (component)
+  const { run: runCpp } = await load({
+    jco: () => import("../../cpp/canvas-pixels/jco/canvas_pixels.js"),
+    wasm: new URL("../../cpp/canvas-pixels/native/canvas_pixels.wasm", import.meta.url),
+  });
+  runCpp(params.size, minMs);
+  await new Promise(res => setTimeout(res, delay));
+
+  // c (component)
+  const { run: runC } = await load({
+    jco: () => import("../../c/canvas-pixels/jco/canvas_pixels.js"),
+    wasm: new URL("../../c/canvas-pixels/native/canvas_pixels.wasm", import.meta.url),
+  });
+  runC(params.size, minMs);
+  await new Promise(res => setTimeout(res, delay));
+}
+
+function clear() {
+  let next = document.querySelector("body script").nextSibling;
+  while (next) {
+    const toRemove = next;
+    next = next.nextSibling;
+    toRemove.remove();
+  }
+}
+
+// The two canvases sit in a wrapper <div> between the heading and the metrics
+// table, so walk forward to the first sibling table.
+function metricsTable(heading) {
+  let el = heading.nextElementSibling;
+  while (el && el.tagName !== "TABLE") {
+    el = el.nextElementSibling;
+  }
+  return el;
+}
+
+function getMeasurements() {
+  const measurements = {};
+  for (const heading of document.querySelectorAll("h2")) {
+    const table = metricsTable(heading);
+    const dirs = getTableColumnValuesByName(table, "direction");
+    const usCall = getTableColumnValuesByName(table, "µs/call");
+    const get = dirs.indexOf("getImageData()");
+    const put = dirs.indexOf("putImageData()");
+    measurements[heading.textContent] = {
+      "getImageData(): µs/call": parseDuration(`${usCall[get]} µs`),
+      "putImageData(): µs/call": parseDuration(`${usCall[put]} µs`),
+    };
+  }
+  return measurements;
+}
+
+init(runAll, 10, clear, getMeasurements);

@@ -1,6 +1,4 @@
-import { init, load } from "../../host/common.js";
-
-const params = init();
+import { init, load, parseDuration, getTableColumnValuesByName } from "../../host/common.js";
 
 function renderReport(title, rows) {
   const heading = document.createElement("h2");
@@ -70,35 +68,69 @@ function runRawJs(count, iterations) {
   performance.measure("js", "js-start", "js-end");
 }
 
-// js
-runRawJs(params.numElements, params.iters);
-await new Promise(res => setTimeout(res, 100));
+async function runAll(params) {
+  const delay = 50;
 
-// c++ (emscripten)
-const { default: createEmscripten } = await import("../../cpp/dom-query/emscripten/dom_query.mjs");
-const emscripten = await createEmscripten();
-emscripten.run(params.numElements, params.iters);
-await new Promise(res => setTimeout(res, 100));
+  // js
+  runRawJs(params.numElements, params.iters);
+  await new Promise(res => setTimeout(res, delay));
 
-// rust
-const { run: runRust } = await load({
-  jco: () => import("../../rust/dom-query/jco/dom_query.js"),
-  wasm: new URL("../../rust/dom-query/native/dom_query.wasm", import.meta.url),
-});
-runRust(params.numElements, params.iters);
-await new Promise(res => setTimeout(res, 100));
+  // c++ (emscripten)
+  const { default: createEmscripten } = await import("../../cpp/dom-query/emscripten/dom_query.mjs");
+  const emscripten = await createEmscripten();
+  emscripten.run(params.numElements, params.iters);
+  await new Promise(res => setTimeout(res, delay));
 
-// c++ (component)
-const { run: runCpp } = await load({
-  jco: () => import("../../cpp/dom-query/jco/dom_query.js"),
-  wasm: new URL("../../cpp/dom-query/native/dom_query.wasm", import.meta.url),
-});
-runCpp(params.numElements, params.iters);
-await new Promise(res => setTimeout(res, 100));
+  // rust
+  const { run: runRust } = await load({
+    jco: () => import("../../rust/dom-query/jco/dom_query.js"),
+    wasm: new URL("../../rust/dom-query/native/dom_query.wasm", import.meta.url),
+  });
+  runRust(params.numElements, params.iters);
+  await new Promise(res => setTimeout(res, delay));
 
-// c (component)
-const { run: runC } = await load({
-  jco: () => import("../../c/dom-query/jco/dom_query.js"),
-  wasm: new URL("../../c/dom-query/native/dom_query.wasm", import.meta.url),
-});
-runC(params.numElements, params.iters);
+  // c++ (component)
+  const { run: runCpp } = await load({
+    jco: () => import("../../cpp/dom-query/jco/dom_query.js"),
+    wasm: new URL("../../cpp/dom-query/native/dom_query.wasm", import.meta.url),
+  });
+  runCpp(params.numElements, params.iters);
+  await new Promise(res => setTimeout(res, delay));
+
+  // c (component)
+  const { run: runC } = await load({
+    jco: () => import("../../c/dom-query/jco/dom_query.js"),
+    wasm: new URL("../../c/dom-query/native/dom_query.wasm", import.meta.url),
+  });
+  runC(params.numElements, params.iters);
+  await new Promise(res => setTimeout(res, delay));
+}
+
+function clear() {
+  let next = document.querySelector("body script").nextSibling;
+  while (next) {
+    const toRemove = next;
+    next = next.nextSibling;
+    toRemove.remove();
+  }
+}
+
+function getMeasurements() {
+  const measurements = {};
+  for (const heading of document.querySelectorAll("h2")) {
+    const table = heading.nextElementSibling;
+    const approaches = getTableColumnValuesByName(table, "approach");
+    const totalMs = getTableColumnValuesByName(table, "total ms");
+    const usPer = getTableColumnValuesByName(table, "µs/element");
+    const indiv = approaches.indexOf("individual (getElementById)");
+    const bulk = approaches.indexOf("bulk (getElementsByClassName)");
+    measurements[heading.textContent] = {
+      "individual: total ms": parseDuration(`${totalMs[indiv]} ms`),
+      "bulk: total ms": parseDuration(`${totalMs[bulk]} ms`),
+      "individual: µs/element": parseDuration(`${usPer[indiv]} µs`),
+    };
+  }
+  return measurements;
+}
+
+init(runAll, 10, clear, getMeasurements);

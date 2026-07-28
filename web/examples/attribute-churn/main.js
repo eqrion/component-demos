@@ -1,6 +1,4 @@
-import { init, load } from "../../host/common.js";
-
-const params = init();
+import { init, load, parseDuration, getTableRowValuesByName } from "../../host/common.js";
 
 const ATTRS = ["data-x", "data-y", "class", "title"];
 
@@ -50,35 +48,63 @@ function runRawJs(elementCount, iters) {
   performance.measure("js", "js-start", "js-end");
 }
 
-// js
-runRawJs(params.elements, params.iters);
-await new Promise(res => setTimeout(res, 100));
+async function runAll(params) {
+  const delay = 50;
 
-// c++ (emscripten)
-const { default: createEmscripten } = await import("../../cpp/attribute-churn/emscripten/attribute_churn.mjs");
-const emscripten = await createEmscripten();
-emscripten.run(params.elements, params.iters);
-await new Promise(res => setTimeout(res, 100));
+  // js
+  runRawJs(params.elements, params.iters);
+  await new Promise(res => setTimeout(res, delay));
 
-// rust
-const { run: runRust } = await load({
-  jco: () => import("../../rust/attribute-churn/jco/attribute_churn.js"),
-  wasm: new URL("../../rust/attribute-churn/native/attribute_churn.wasm", import.meta.url),
-});
-runRust(params.elements, params.iters);
-await new Promise(res => setTimeout(res, 100));
+  // c++ (emscripten)
+  const { default: createEmscripten } = await import("../../cpp/attribute-churn/emscripten/attribute_churn.mjs");
+  const emscripten = await createEmscripten();
+  emscripten.run(params.elements, params.iters);
+  await new Promise(res => setTimeout(res, delay));
 
-// c++ (component)
-const { run: runCpp } = await load({
-  jco: () => import("../../cpp/attribute-churn/jco/attribute_churn.js"),
-  wasm: new URL("../../cpp/attribute-churn/native/attribute_churn.wasm", import.meta.url),
-});
-runCpp(params.elements, params.iters);
-await new Promise(res => setTimeout(res, 100));
+  // rust
+  const { run: runRust } = await load({
+    jco: () => import("../../rust/attribute-churn/jco/attribute_churn.js"),
+    wasm: new URL("../../rust/attribute-churn/native/attribute_churn.wasm", import.meta.url),
+  });
+  runRust(params.elements, params.iters);
+  await new Promise(res => setTimeout(res, delay));
 
-// c (component)
-const { run: runC } = await load({
-  jco: () => import("../../c/attribute-churn/jco/attribute_churn.js"),
-  wasm: new URL("../../c/attribute-churn/native/attribute_churn.wasm", import.meta.url),
-});
-runC(params.elements, params.iters);
+  // c++ (component)
+  const { run: runCpp } = await load({
+    jco: () => import("../../cpp/attribute-churn/jco/attribute_churn.js"),
+    wasm: new URL("../../cpp/attribute-churn/native/attribute_churn.wasm", import.meta.url),
+  });
+  runCpp(params.elements, params.iters);
+  await new Promise(res => setTimeout(res, delay));
+
+  // c (component)
+  const { run: runC } = await load({
+    jco: () => import("../../c/attribute-churn/jco/attribute_churn.js"),
+    wasm: new URL("../../c/attribute-churn/native/attribute_churn.wasm", import.meta.url),
+  });
+  runC(params.elements, params.iters);
+  await new Promise(res => setTimeout(res, delay));
+}
+
+function clear() {
+  let next = document.querySelector("body script").nextSibling;
+  while (next) {
+    const toRemove = next;
+    next = next.nextSibling;
+    toRemove.remove();
+  }
+}
+
+function getMeasurements() {
+  const measurements = {};
+  for (const heading of document.querySelectorAll("h2")) {
+    const table = heading.nextElementSibling;
+    measurements[heading.textContent] = {
+      "total time": parseDuration(getTableRowValuesByName(table, "total time")[0]),
+      "per setAttribute()": parseDuration(getTableRowValuesByName(table, "per setAttribute()")[0]),
+    };
+  }
+  return measurements;
+}
+
+init(runAll, 10, clear, getMeasurements);
