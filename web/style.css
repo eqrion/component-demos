@@ -53,4 +53,9 @@ body:not(.no-styles) {
   tr:nth-child(even) {
     background-color: #e9ecf2;
   }
+
+  form {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
 }

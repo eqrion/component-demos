@@ -1,6 +1,4 @@
-import { init, load } from "../../host/common.js";
-
-const params = init();
+import { init, load, parseDuration, getTableRowValuesByName } from "../../host/common.js";
 
 function buildTree(document, depth, numChildren) {
   const el = document.createElement("div");
@@ -65,35 +63,64 @@ function runRawJs(depth, numChildren) {
   performance.measure("js", "js-start", "js-end");
 }
 
-// js
-runRawJs(params.depth, params.numChildren);
-await new Promise(res => setTimeout(res, 100));
+async function runAll(params) {
+  const delay = 50;
 
-// c++ (emscripten)
-const { default: createEmscripten } = await import("../../cpp/dom-traversal/emscripten/dom_traversal.mjs");
-const emscripten = await createEmscripten();
-emscripten.run(params.depth, params.numChildren);
-await new Promise(res => setTimeout(res, 100));
+  // js
+  runRawJs(params.depth, params.numChildren);
+  await new Promise(res => setTimeout(res, delay));
 
-// rust
-const { run: runRust } = await load({
-  jco: () => import("../../rust/dom-traversal/jco/dom_traversal.js"),
-  wasm: new URL("../../rust/dom-traversal/native/dom_traversal.wasm", import.meta.url),
-});
-runRust(params.depth, params.numChildren);
-await new Promise(res => setTimeout(res, 100));
+  // c++ (emscripten)
+  const { default: createEmscripten } = await import("../../cpp/dom-traversal/emscripten/dom_traversal.mjs");
+  const emscripten = await createEmscripten();
+  emscripten.run(params.depth, params.numChildren);
+  await new Promise(res => setTimeout(res, delay));
 
-// c++ (component)
-const { run: runCpp } = await load({
-  jco: () => import("../../cpp/dom-traversal/jco/dom_traversal.js"),
-  wasm: new URL("../../cpp/dom-traversal/native/dom_traversal.wasm", import.meta.url),
-});
-runCpp(params.depth, params.numChildren);
-await new Promise(res => setTimeout(res, 100));
+  // rust
+  const { run: runRust } = await load({
+    jco: () => import("../../rust/dom-traversal/jco/dom_traversal.js"),
+    wasm: new URL("../../rust/dom-traversal/native/dom_traversal.wasm", import.meta.url),
+  });
+  runRust(params.depth, params.numChildren);
+  await new Promise(res => setTimeout(res, delay));
 
-// c (component)
-const { run: runC } = await load({
-  jco: () => import("../../c/dom-traversal/jco/dom_traversal.js"),
-  wasm: new URL("../../c/dom-traversal/native/dom_traversal.wasm", import.meta.url),
-});
-runC(params.depth, params.numChildren);
+  // c++ (component)
+  const { run: runCpp } = await load({
+    jco: () => import("../../cpp/dom-traversal/jco/dom_traversal.js"),
+    wasm: new URL("../../cpp/dom-traversal/native/dom_traversal.wasm", import.meta.url),
+  });
+  runCpp(params.depth, params.numChildren);
+  await new Promise(res => setTimeout(res, delay));
+
+  // c (component)
+  const { run: runC } = await load({
+    jco: () => import("../../c/dom-traversal/jco/dom_traversal.js"),
+    wasm: new URL("../../c/dom-traversal/native/dom_traversal.wasm", import.meta.url),
+  });
+  runC(params.depth, params.numChildren);
+  await new Promise(res => setTimeout(res, delay));
+}
+
+function clear() {
+  let next = document.querySelector("body script").nextSibling;
+  while (next) {
+    const toRemove = next;
+    next = next.nextSibling;
+    toRemove.remove();
+  }
+}
+
+function getMeasurements() {
+  const measurements = {};
+  for (const heading of document.querySelectorAll("h2")) {
+    const table = heading.nextSibling;
+    measurements[heading.textContent] = {
+      "build": parseDuration(getTableRowValuesByName(table, "build")[0]),
+      "traverse (total)": parseDuration(getTableRowValuesByName(table, "traverse (total)")[0]),
+      "traverse (per node)": parseDuration(getTableRowValuesByName(table, "traverse (per node)")[0]),
+    };
+  }
+  return measurements;
+}
+
+init(runAll, 10, clear, getMeasurements);
