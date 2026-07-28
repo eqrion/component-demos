@@ -68,6 +68,39 @@ export function init() {
   nav.appendChild(backLink);
   nav.appendChild(toggle)
 
+  // Hydrate param inputs
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramInputs = document.querySelectorAll("input[data-param]");
+  const finalParams = {};
+  for (const input of paramInputs) {
+    input.type = "number";
+    input.style.width = "4rem";
+    const paramValue = urlParams.get(input.dataset.param);
+    if (paramValue === null) {
+      input.value = input.dataset.default;
+    } else {
+      input.value = paramValue;
+    }
+    finalParams[input.dataset.param] = Number(input.value);
+  }
+  const form = document.querySelector("form");
+  if (form) {
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const newParams = new URLSearchParams(location.search);
+      for (const input of paramInputs) {
+        newParams.set(input.dataset.param, input.value);
+      }
+      location.search = newParams;
+    });
+    document.querySelector("#reset").addEventListener("click", e => {
+      e.preventDefault();
+      for (const input of paramInputs) {
+        input.value = input.dataset.default;
+      }
+    });
+  }
+
   if (isNative() && !WebAssembly.Component) {
     const err = document.createElement("div");
     err.classList.add("error");
@@ -79,4 +112,6 @@ export function init() {
 
     throw new Error("No component support");
   }
+
+  return finalParams;
 }

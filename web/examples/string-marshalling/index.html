@@ -10,10 +10,15 @@
 <body>
   <div id="nav"></div>
 
-  <p>
-    Repeatedly sets and gets the <code>textContent</code> of an offscreen div with a string of length <code>size</code>.
-    This exercises the speed of text encoding and decoding via the component model.
-  </p>
+  <form>
+    <p>
+      Repeatedly sets and gets the <code>textContent</code> of an offscreen div with a string of length <code>size</code>.
+      This exercises the speed of text encoding and decoding via the component model.
+      Each size is measured for at least <input data-param="ms" data-default="10"></input> ms.
+    </p>
+    <input type="submit" value="Reload">
+    <button id="reset">Reset Params</button>
+  </form>
 
   <script type="module" src="./main.js"></script>
 </body>

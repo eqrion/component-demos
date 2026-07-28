@@ -10,8 +10,16 @@
 <body>
   <div id="nav"></div>
 
-  <p>Build a DOM tree of depth <span id="depth">?</span> with <span id="numChildren">?</span> children per node,
-    then walk it.</p>
+  <form>
+    <p>
+      Build a DOM tree of depth
+      <input data-param="depth" data-default="8"></input> with
+      <input data-param="numChildren" data-default="4"></input> children per node,
+      then walk it.
+    </p>
+    <input type="submit" value="Reload">
+    <button id="reset">Reset Params</button>
+  </form>
 
   <script type="module" src="./main.js"></script>
 </body>

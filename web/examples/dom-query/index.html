@@ -10,10 +10,14 @@
 <body>
   <div id="nav"></div>
 
-  <p>
-    Insert <span id="numElements">?</span> elements into the DOM, then query them individually and
-    in bulk <span id="iters">?</span> times.
-  </p>
+  <form>
+    <p>
+      Insert <input data-param="numElements" data-default="10000"></input> elements into the DOM, then query
+      them individually and in bulk <input data-param="iters" data-default="20"></input> times.
+    </p>
+    <input type="submit" value="Reload">
+    <button id="reset">Reset Params</button>
+  </form>
 
   <script type="module" src="./main.js"></script>
 </body>

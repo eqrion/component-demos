@@ -10,9 +10,14 @@
 <body>
   <div id="nav"></div>
 
-  <p>
-    Copies a region of pixels from one canvas to another.
-  </p>
+  <form>
+    <p>
+      Copies a region of pixels from one canvas to another, using canvases
+      <input data-param="size" data-default="256"></input> pixels on a side.
+    </p>
+    <input type="submit" value="Reload">
+    <button id="reset">Reset Params</button>
+  </form>
 
   <script type="module" src="./main.js"></script>
 </body>

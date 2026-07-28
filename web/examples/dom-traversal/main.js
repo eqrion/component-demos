@@ -1,13 +1,6 @@
 import { init, load } from "../../host/common.js";
 
-init();
-
-const params = new URLSearchParams(window.location.search);
-const depth = Number(params.get("depth") ?? 8);
-const numChildren = Number(params.get("num_children") ?? 4);
-window.depth.textContent = `${depth}`;
-window.numChildren.textContent = `${numChildren}`;
-await new Promise(res => requestAnimationFrame(res)); // redraw page
+const params = init();
 
 function buildTree(document, depth, numChildren) {
   const el = document.createElement("div");
@@ -73,13 +66,13 @@ function runRawJs(depth, numChildren) {
 }
 
 // js
-runRawJs(depth, numChildren);
+runRawJs(params.depth, params.numChildren);
 await new Promise(res => setTimeout(res, 100));
 
 // c++ (emscripten)
 const { default: createEmscripten } = await import("../../cpp/dom-traversal/emscripten/dom_traversal.mjs");
 const emscripten = await createEmscripten();
-emscripten.run(depth, numChildren);
+emscripten.run(params.depth, params.numChildren);
 await new Promise(res => setTimeout(res, 100));
 
 // rust
@@ -87,7 +80,7 @@ const { run: runRust } = await load({
   jco: () => import("../../rust/dom-traversal/jco/dom_traversal.js"),
   wasm: new URL("../../rust/dom-traversal/native/dom_traversal.wasm", import.meta.url),
 });
-runRust(depth, numChildren);
+runRust(params.depth, params.numChildren);
 await new Promise(res => setTimeout(res, 100));
 
 // c++ (component)
@@ -95,7 +88,7 @@ const { run: runCpp } = await load({
   jco: () => import("../../cpp/dom-traversal/jco/dom_traversal.js"),
   wasm: new URL("../../cpp/dom-traversal/native/dom_traversal.wasm", import.meta.url),
 });
-runCpp(depth, numChildren);
+runCpp(params.depth, params.numChildren);
 await new Promise(res => setTimeout(res, 100));
 
 // c (component)
@@ -103,4 +96,4 @@ const { run: runC } = await load({
   jco: () => import("../../c/dom-traversal/jco/dom_traversal.js"),
   wasm: new URL("../../c/dom-traversal/native/dom_traversal.wasm", import.meta.url),
 });
-runC(depth, numChildren);
+runC(params.depth, params.numChildren);

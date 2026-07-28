@@ -10,7 +10,11 @@
 <body>
   <div id="nav"></div>
 
-  <p>Draw N rectangles at random positions using Canvas2D.</p>
+  <form>
+    <p>Draw <input data-param="rects" data-default="20000"></input> rectangles at random positions using Canvas2D.</p>
+    <input type="submit" value="Reload">
+    <button id="reset">Reset Params</button>
+  </form>
 
   <script type="module" src="./main.js"></script>
 </body>

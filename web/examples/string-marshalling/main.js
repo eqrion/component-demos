@@ -1,13 +1,10 @@
 import { init, load } from "../../host/common.js";
 
-init();
+const params = init();
 const { run } = await load({
   jco: () => import("../../rust/string-marshalling/jco/string_marshalling.js"),
   wasm: new URL("../../rust/string-marshalling/native/string_marshalling.wasm", import.meta.url),
 });
-
-const params = new URLSearchParams(window.location.search);
-const minMs = Number(params.get("ms") ?? 10);
 
 const SIZES = [8, 128, 1024, 16384, 262144];
 const MAX_REPS = 1 << 24;
@@ -96,6 +93,6 @@ function runRawJs(minMs) {
   performance.measure("js", "js-start", "js-end");
 }
 
-runRawJs(minMs);
+runRawJs(params.ms);
 await new Promise(res => setTimeout(res, 100));
-run(minMs);
+run(params.ms);

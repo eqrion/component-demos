@@ -10,10 +10,15 @@
 <body>
   <div id="nav"></div>
 
-  <p>
-    Call <code>setAttribute</code> 4 * <span id="iters">?</span> times
-    on <span id="numElements">?</span> elements.
-  </p>
+  <form>
+    <p>
+      Call <code>setAttribute</code> 4 *
+      <input data-param="iters" data-default="20"></input> times
+      on <input data-param="elements" data-default="2000"></input> elements.
+    </p>
+    <input type="submit" value="Reload">
+    <button id="reset">Reset Params</button>
+  </form>
 
   <script type="module" src="./main.js"></script>
 </body>

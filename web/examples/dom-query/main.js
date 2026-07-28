@@ -1,13 +1,6 @@
 import { init, load } from "../../host/common.js";
 
-init();
-
-const params = new URLSearchParams(window.location.search);
-const numElements = Number(params.get("num_elements") ?? 10000);
-const iterations = Number(params.get("iters") ?? 20);
-window.numElements.textContent = `${numElements}`;
-window.iters.textContent = `${iterations}`;
-await new Promise(res => setTimeout(res, 0)); // redraw page
+const params = init();
 
 function renderReport(title, rows) {
   const heading = document.createElement("h2");
@@ -78,13 +71,13 @@ function runRawJs(count, iterations) {
 }
 
 // js
-runRawJs(numElements, iterations);
+runRawJs(params.numElements, params.iters);
 await new Promise(res => setTimeout(res, 100));
 
 // c++ (emscripten)
 const { default: createEmscripten } = await import("../../cpp/dom-query/emscripten/dom_query.mjs");
 const emscripten = await createEmscripten();
-emscripten.run(numElements, iterations);
+emscripten.run(params.numElements, params.iters);
 await new Promise(res => setTimeout(res, 100));
 
 // rust
@@ -92,7 +85,7 @@ const { run: runRust } = await load({
   jco: () => import("../../rust/dom-query/jco/dom_query.js"),
   wasm: new URL("../../rust/dom-query/native/dom_query.wasm", import.meta.url),
 });
-runRust(numElements, iterations);
+runRust(params.numElements, params.iters);
 await new Promise(res => setTimeout(res, 100));
 
 // c++ (component)
@@ -100,7 +93,7 @@ const { run: runCpp } = await load({
   jco: () => import("../../cpp/dom-query/jco/dom_query.js"),
   wasm: new URL("../../cpp/dom-query/native/dom_query.wasm", import.meta.url),
 });
-runCpp(numElements, iterations);
+runCpp(params.numElements, params.iters);
 await new Promise(res => setTimeout(res, 100));
 
 // c (component)
@@ -108,4 +101,4 @@ const { run: runC } = await load({
   jco: () => import("../../c/dom-query/jco/dom_query.js"),
   wasm: new URL("../../c/dom-query/native/dom_query.wasm", import.meta.url),
 });
-runC(numElements, iterations);
+runC(params.numElements, params.iters);

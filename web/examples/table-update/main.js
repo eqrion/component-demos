@@ -1,11 +1,6 @@
 import { init, load } from "../../host/common.js";
 
-init();
-
-const params = new URLSearchParams(window.location.search);
-const rowCount = Number(params.get("rows") ?? 2000);
-window.numRows.textContent = `${rowCount}`;
-await new Promise(res => setTimeout(res, 0));
+const params = init();
 
 function isPrime(n) {
   for (let i = 2; i <= Math.floor(n / 2); i++) {
@@ -106,13 +101,13 @@ function runRawJs(rowCount) {
 }
 
 // js
-runRawJs(rowCount);
+runRawJs(params.rows);
 await new Promise(res => setTimeout(res, 100));
 
 // c++ (emscripten)
 const { default: createEmscripten } = await import("../../cpp/table-update/emscripten/table_update.mjs");
 const emscripten = await createEmscripten();
-emscripten.run(rowCount);
+emscripten.run(params.rows);
 await new Promise(res => setTimeout(res, 100));
 
 // rust
@@ -120,7 +115,7 @@ const { run: runRust } = await load({
   jco: () => import("../../rust/table-update/jco/table_update.js"),
   wasm: new URL("../../rust/table-update/native/table_update.wasm", import.meta.url),
 });
-runRust(rowCount);
+runRust(params.rows);
 await new Promise(res => setTimeout(res, 100));
 
 // c++ (component)
@@ -128,7 +123,7 @@ const { run: runCpp } = await load({
   jco: () => import("../../cpp/table-update/jco/table_update.js"),
   wasm: new URL("../../cpp/table-update/native/table_update.wasm", import.meta.url),
 });
-runCpp(rowCount);
+runCpp(params.rows);
 await new Promise(res => setTimeout(res, 100));
 
 // c (component)
@@ -136,4 +131,4 @@ const { run: runC } = await load({
   jco: () => import("../../c/table-update/jco/table_update.js"),
   wasm: new URL("../../c/table-update/native/table_update.wasm", import.meta.url),
 });
-runC(rowCount);
+runC(params.rows);
