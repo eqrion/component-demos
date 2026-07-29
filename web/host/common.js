@@ -117,7 +117,6 @@ function initUI() {
 }
 
 function benchmarkReport(allMeasurements) {
-  console.log(allMeasurements);
   const langs = Object.keys(allMeasurements[0]);
   const metrics = Object.keys(allMeasurements[0][langs[0]]);
 
@@ -189,34 +188,52 @@ function benchmarkReport(allMeasurements) {
     }
   }
 
-  // Build raw data table
+  // Build raw data table / CSV
   const raw = document.createElement("details");
   const rawTitle = document.createElement("summary");
   rawTitle.textContent = "Raw data";
   raw.appendChild(rawTitle);
   const rawTable = document.createElement("table");
   raw.appendChild(rawTable);
+  const rawCSV = document.createElement("textarea");
+  rawCSV.readOnly = true;
+  rawCSV.rows = 20;
+  rawCSV.cols = 100;
+  rawCSV.style.textWrap = "nowrap";
+  raw.appendChild(rawCSV);
   {
     const header = document.createElement("tr");
+    const headerItems = [];
     for (const lang of langs) {
       for (const metric of metrics) {
+        const heading = `${lang}: ${metric}`;
+
         const th = document.createElement("th");
-        th.textContent = `${lang}: ${metric}`;
+        th.textContent = heading;
         header.appendChild(th);
+
+        headerItems.push(heading);
       }
     }
     rawTable.appendChild(header);
+    rawCSV.value += csvRow(headerItems);
 
     for (const m of allMeasurements) {
       const row = document.createElement("tr");
+      const rowItems = [];
       for (const lang of langs) {
         for (const metric of metrics) {
+          const metricText = `${m[lang][metric]}`;
+
           const td = document.createElement("td");
-          td.textContent = `${m[lang][metric]}`;
+          td.textContent = metricText;
           row.appendChild(td);
+
+          rowItems.push(metricText);
         }
       }
       rawTable.appendChild(row);
+      rawCSV.value += csvRow(rowItems);
     }
   }
 
@@ -313,4 +330,21 @@ export function getTableColumnValuesByName(table, name) {
     throw new Error(`no column found with name ${name}`);
   }
   return rows.slice(1).map(row => row.children[col].textContent);
+}
+
+function csvRow(items) {
+  let res = "";
+  for (let i = 0; i < items.length; i++) {
+    if (i > 0) {
+      res += ",";
+    }
+    let item = items[i];
+    const needsEscape = /[,"\n]/.test(item);
+    if (needsEscape) {
+      item = `"${item.replaceAll("\"", "\"\"")}"`;
+    }
+    res += item;
+  }
+  res += "\n";
+  return res;
 }
