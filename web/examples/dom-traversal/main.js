@@ -50,6 +50,8 @@ function runRawJs(depth, numChildren) {
   const traverseMeasure = performance.measure("traverse", "traverse-start", "traverse-end");
   const traverseMs = traverseMeasure.duration;
 
+  root.remove();
+
   const usPerNode = (traverseMs * 1_000) / nodeTotal;
 
   renderReport("Raw JS", [

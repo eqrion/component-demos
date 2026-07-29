@@ -64,6 +64,8 @@ void exports::dom_traversal::Run(int32_t depth, int32_t num_children) {
   double traverse_ms =
       perf.Measure("traverse", "traverse-start", "traverse-end").GetDuration();
 
+  root.Remove();
+
   double us_per_node = (traverse_ms * 1000.0) / static_cast<double>(node_total);
 
   dom::Element heading = document.CreateElement("h2");

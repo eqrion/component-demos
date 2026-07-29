@@ -6,6 +6,7 @@ world dom-traversal {
     create-element: func(local-name: string) -> element;
   }
   resource element {
+    remove: func();
     append-child: func(child: borrow<element>) -> element;
     get-first-child: func() -> option<element>;
     get-next-sibling: func() -> option<element>;

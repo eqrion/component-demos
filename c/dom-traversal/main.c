@@ -63,17 +63,18 @@ static dt_own_element_t build_tree(dt_borrow_document_t document, int depth,
 }
 
 // Walks the tree, consuming (dropping) each handle it visits.
-static uint32_t traverse(dt_own_element_t node) {
+static uint32_t traverse(dt_borrow_element_t node) {
   uint32_t count = 1;
   dt_own_element_t child;
-  if (dt_method_element_get_first_child(dt_borrow_element(node), &child)) {
-    count += traverse(child);
+  if (dt_method_element_get_first_child(node, &child)) {
+    count += traverse(dt_borrow_element(child));
+    dt_element_drop_own(child);
   }
   dt_own_element_t sibling;
-  if (dt_method_element_get_next_sibling(dt_borrow_element(node), &sibling)) {
-    count += traverse(sibling);
+  if (dt_method_element_get_next_sibling(node, &sibling)) {
+    count += traverse(dt_borrow_element(sibling));
+    dt_element_drop_own(sibling);
   }
-  dt_element_drop_own(node);
   return count;
 }
 
@@ -111,10 +112,13 @@ void exports_dt_run(int32_t depth, int32_t num_children) {
   double build_ms = measure(perf, "build", "build-start", "build-end");
 
   mark(perf, "traverse-start");
-  uint32_t node_total = traverse(root);
+  uint32_t node_total = traverse(dt_borrow_element(root));
   mark(perf, "traverse-end");
   double traverse_ms =
       measure(perf, "traverse", "traverse-start", "traverse-end");
+
+  dt_method_element_remove(dt_borrow_element(root));
+  dt_element_drop_own(root);
 
   double us_per_node = (traverse_ms * 1000.0) / (double)node_total;
 

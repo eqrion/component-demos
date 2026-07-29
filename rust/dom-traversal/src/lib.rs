@@ -105,6 +105,8 @@ impl Guest for Component {
 
         let us_per_node = (traverse_ms * 1_000.0) / node_total as f64;
 
+        root.remove();
+
         let heading = document.create_element("h2");
         heading.set_text_content("Wasm component (Rust)");
 
