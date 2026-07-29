@@ -226,9 +226,10 @@ function benchmarkReport(allMeasurements) {
   return res;
 }
 
+const BENCHMARK_ITERS = 20;
+
 export async function init(
   runAll,
-  benchmarkIters = 0,
   clear = null,
   getMeasurements = null,
 ) {
@@ -236,7 +237,7 @@ export async function init(
 
   async function benchmark() {
     const allMeasurements = [];
-    for (let i = 0; i < benchmarkIters; i++) {
+    for (let i = 0; i < BENCHMARK_ITERS; i++) {
       clear();
       await runAll(params);
       allMeasurements.push(getMeasurements());

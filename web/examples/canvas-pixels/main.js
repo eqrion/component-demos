@@ -187,4 +187,4 @@ function getMeasurements() {
   return measurements;
 }
 
-init(runAll, 10, clear, getMeasurements);
+init(runAll, clear, getMeasurements);
