@@ -68,7 +68,7 @@ static void run(int depth, int num_children) {
   double us_per_node = (traverse_ms * 1000.0) / static_cast<double>(node_total);
 
   val heading = document.call<val>("createElement", val("h2"));
-  heading.set("textContent", val(std::string("Emscripten (C++)")));
+  heading.set("textContent", val(std::string("Emscripten (C++, embind)")));
 
   val table = document.call<val>("createElement", val("table"));
   append_row(document, table, "nodes", std::to_string(node_total));

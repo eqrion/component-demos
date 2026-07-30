@@ -5,12 +5,16 @@ web/dist/
 web/*/*/jco/
 web/*/*/native/
 web/*/*/emscripten/
+web/*/*/em-js/
+web/rust/dom-traversal-wasm-bindgen/
 **/src/bindings.rs
 .DS_Store
 
 # C / raw-toolchain intermediates
 build/
 **/bindings/
+# wasm-bindgen (wasm-pack) output
+pkg/
 # WASI SDK (full toolchain), installed on demand via install_wasi_sdk.sh
 _wasi-sdk/
 # Emscripten SDK (emsdk + pinned toolchain), installed via install_emscripten.sh

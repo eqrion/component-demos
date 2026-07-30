@@ -72,13 +72,25 @@ async function runAll(params) {
   runRawJs(params.depth, params.numChildren);
   await new Promise(res => setTimeout(res, delay));
 
-  // c++ (emscripten)
+  // c++ (emscripten, embind)
   const { default: createEmscripten } = await import("../../cpp/dom-traversal/emscripten/dom_traversal.mjs");
   const emscripten = await createEmscripten();
   emscripten.run(params.depth, params.numChildren);
   await new Promise(res => setTimeout(res, delay));
 
-  // rust
+  // c++ (emscripten, EM_JS)
+  const { default: createEmJs } = await import("../../cpp/dom-traversal/em-js/dom_traversal.mjs");
+  const emJs = await createEmJs();
+  emJs._run(params.depth, params.numChildren);
+  await new Promise(res => setTimeout(res, delay));
+
+  // rust (wasm-bindgen)
+  const { default: initWasmBindgen, run: runWasmBindgen } = await import("../../rust/dom-traversal-wasm-bindgen/dom_traversal_wasm_bindgen.js");
+  await initWasmBindgen();
+  runWasmBindgen(params.depth, params.numChildren);
+  await new Promise(res => setTimeout(res, delay));
+
+  // rust (component)
   const { run: runRust } = await load({
     jco: () => import("../../rust/dom-traversal/jco/dom_traversal.js"),
     wasm: new URL("../../rust/dom-traversal/native/dom_traversal.wasm", import.meta.url),
