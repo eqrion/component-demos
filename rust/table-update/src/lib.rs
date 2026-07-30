@@ -49,15 +49,6 @@ wit_bindgen::generate!({
 
 struct Component;
 
-fn is_prime(n: usize) -> bool {
-    for i in 2..=n / 2 {
-        if n % i == 0 {
-            return false;
-        }
-    }
-    true
-}
-
 fn append_row(
     document: &Document,
     table: &Element,
@@ -118,9 +109,9 @@ impl Guest for Component {
         let mut updated: u32 = 0;
         for (i, (tr, td)) in rows.iter().enumerate() {
             let i = i + 1;
-            if is_prime(i) {
-                td.set_text_content(&format!("row {i} (prime)"));
-                tr.set_attribute("data-prime", "data-prime");
+            if i % 8 == 0 {
+                td.set_text_content(&format!("row {i} (selected)"));
+                tr.set_attribute("data-selected", "data-selected");
                 updated += 1;
             }
         }
@@ -132,7 +123,7 @@ impl Guest for Component {
         perf.mark("clear-start");
         let mut cleared: u32 = 0;
         for (tr, _) in &rows {
-            if tr.get_attribute("data-prime").is_none() {
+            if tr.get_attribute("data-selected").is_none() {
                 tr.remove();
                 cleared += 1;
             }
@@ -162,7 +153,7 @@ impl Guest for Component {
         append_row(
             &document,
             &report,
-            "update (primes)",
+            "update (selected)",
             &format!("{update_ms:.3}"),
             &format!("{:.3}", update_ms * 1_000.0 / row_count as f64),
             &format!("{:.3}", update_ms * 1_000.0 / updated as f64),
@@ -170,7 +161,7 @@ impl Guest for Component {
         append_row(
             &document,
             &report,
-            "clear (non-primes)",
+            "clear (unselected)",
             &format!("{clear_ms:.3}"),
             &format!("{:.3}", clear_ms * 1_000.0 / row_count as f64),
             &format!("{:.3}", clear_ms * 1_000.0 / cleared as f64),

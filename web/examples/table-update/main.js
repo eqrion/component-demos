@@ -1,14 +1,5 @@
 import { init, load, parseDuration, getTableColumnValuesByName } from "../../host/common.js";
 
-function isPrime(n) {
-  for (let i = 2; i <= Math.floor(n / 2); i++) {
-    if (n % i === 0) {
-      return false;
-    }
-  }
-  return true;
-}
-
 function buildReport(rows) {
   const table = document.createElement("table");
   const header = document.createElement("tr");
@@ -67,10 +58,10 @@ function runRawJs(rowCount) {
   let updated = 0;
   for (let idx = 0; idx < rows.length; idx++) {
     const i = idx + 1;
-    if (isPrime(i)) {
+    if (i % 8 === 0) {
       const [tr, td] = rows[idx];
-      td.textContent = `row ${i} (prime)`;
-      tr.setAttribute("data-prime", "data-prime");
+      td.textContent = `row ${i} (selected)`;
+      tr.setAttribute("data-selected", "data-selected");
       updated++;
     }
   }
@@ -80,7 +71,7 @@ function runRawJs(rowCount) {
   performance.mark("clear-start");
   let cleared = 0;
   for (const [tr] of rows) {
-    if (tr.getAttribute("data-prime") === null) {
+    if (tr.getAttribute("data-selected") === null) {
       tr.remove();
       cleared++;
     }
@@ -90,8 +81,8 @@ function runRawJs(rowCount) {
 
   document.body.appendChild(buildReport([
     ["create", createMs.toFixed(3), ((createMs * 1_000) / rowCount).toFixed(3), "-"],
-    ["update (primes)", updateMs.toFixed(3), ((updateMs * 1_000) / rowCount).toFixed(3), ((updateMs * 1_000) / updated).toFixed(3)],
-    ["clear (non-primes)", clearMs.toFixed(3), ((clearMs * 1_000) / rowCount).toFixed(3), ((clearMs * 1_000) / cleared).toFixed(3)],
+    ["update (selected)", updateMs.toFixed(3), ((updateMs * 1_000) / rowCount).toFixed(3), ((updateMs * 1_000) / updated).toFixed(3)],
+    ["clear (unselected)", clearMs.toFixed(3), ((clearMs * 1_000) / rowCount).toFixed(3), ((clearMs * 1_000) / cleared).toFixed(3)],
   ]));
 
   performance.mark("js-end");
@@ -175,7 +166,7 @@ function getMeasurements() {
     const totalMs = getTableColumnValuesByName(table, "total ms");
     const usRow = getTableColumnValuesByName(table, "µs/row");
     const m = {};
-    for (const phase of ["create", "update (primes)", "clear (non-primes)"]) {
+    for (const phase of ["create", "update (selected)", "clear (unselected)"]) {
       const i = phases.indexOf(phase);
       m[`${phase}: total ms`] = parseDuration(`${totalMs[i]} ms`);
       m[`${phase}: µs/row`] = parseDuration(`${usRow[i]} µs`);

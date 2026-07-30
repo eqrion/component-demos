@@ -69,15 +69,6 @@ static double measure(tu_borrow_performance_t perf, const char *name,
 
 // --- The benchmark -----------------------------------------------------------
 
-static bool is_prime(uint32_t n) {
-  for (uint32_t i = 2; i <= n / 2; i++) {
-    if (n % i == 0) {
-      return false;
-    }
-  }
-  return true;
-}
-
 static void append_row(tu_borrow_document_t document, tu_borrow_element_t table,
                        const char *c0, const char *c1, const char *c2,
                        const char *c3) {
@@ -149,14 +140,14 @@ void exports_tu_run(uint32_t row_count) {
   mark(perf, "update-start");
   uint32_t updated = 0;
   for (uint32_t i = 1; i <= row_count; i++) {
-    if (is_prime(i)) {
+    if (i % 8 == 0) {
       char buf[32];
       size_t n = fmt_str(buf, 0, "row ");
       n = fmt_uint(buf, n, i);
-      n = fmt_str(buf, n, " (prime)");
+      n = fmt_str(buf, n, " (selected)");
       buf[n] = '\0';
       set_text_content(tu_borrow_element(tds[i - 1]), buf);
-      set_attribute(tu_borrow_element(trs[i - 1]), "data-prime", "data-prime");
+      set_attribute(tu_borrow_element(trs[i - 1]), "data-selected", "data-selected");
       updated++;
     }
   }
@@ -166,7 +157,7 @@ void exports_tu_run(uint32_t row_count) {
   mark(perf, "clear-start");
   uint32_t cleared = 0;
   for (uint32_t i = 0; i < row_count; i++) {
-    if (!has_attribute(tu_borrow_element(trs[i]), "data-prime")) {
+    if (!has_attribute(tu_borrow_element(trs[i]), "data-selected")) {
       tu_method_element_remove(tu_borrow_element(trs[i]));
       cleared++;
     }
@@ -203,7 +194,7 @@ void exports_tu_run(uint32_t row_count) {
   perbuf[np] = '\0';
   nt = fmt_fixed(touchedbuf, 0, update_ms * 1000.0 / (double)updated, 3);
   touchedbuf[nt] = '\0';
-  append_row(document, tu_borrow_element(report), "update (primes)", msbuf,
+  append_row(document, tu_borrow_element(report), "update (selected)", msbuf,
              perbuf, touchedbuf);
 
   nm = fmt_fixed(msbuf, 0, clear_ms, 3);
@@ -212,7 +203,7 @@ void exports_tu_run(uint32_t row_count) {
   perbuf[np] = '\0';
   nt = fmt_fixed(touchedbuf, 0, clear_ms * 1000.0 / (double)cleared, 3);
   touchedbuf[nt] = '\0';
-  append_row(document, tu_borrow_element(report), "clear (non-primes)", msbuf,
+  append_row(document, tu_borrow_element(report), "clear (unselected)", msbuf,
              perbuf, touchedbuf);
 
   tu_element_drop_own(

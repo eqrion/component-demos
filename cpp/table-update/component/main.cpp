@@ -10,15 +10,6 @@
 
 namespace dom = demos::table_update::dom;
 
-static bool is_prime(uint32_t n) {
-  for (uint32_t i = 2; i <= n / 2; i++) {
-    if (n % i == 0) {
-      return false;
-    }
-  }
-  return true;
-}
-
 static void append_row(const dom::Document &document, const dom::Element &table,
                        std::string_view c0, std::string_view c1,
                        std::string_view c2, std::string_view c3) {
@@ -77,14 +68,14 @@ void exports::table_update::Run(uint32_t row_count) {
   uint32_t updated = 0;
   for (uint32_t idx = 0; idx < rows.size(); idx++) {
     uint32_t i = idx + 1;
-    if (is_prime(i)) {
+    if (i % 8 == 0) {
       const auto &[tr, td] = rows[idx];
       char buf[32];
       size_t n = fmt_str(buf, 0, "row ");
       n = fmt_uint(buf, n, i);
-      n = fmt_str(buf, n, " (prime)");
+      n = fmt_str(buf, n, " (selected)");
       td.SetTextContent(std::string_view(buf, n));
-      tr.SetAttribute("data-prime", "data-prime");
+      tr.SetAttribute("data-selected", "data-selected");
       updated++;
     }
   }
@@ -95,7 +86,7 @@ void exports::table_update::Run(uint32_t row_count) {
   perf.Mark("clear-start");
   uint32_t cleared = 0;
   for (const auto &[tr, td] : rows) {
-    if (!tr.GetAttribute("data-prime").has_value()) {
+    if (!tr.GetAttribute("data-selected").has_value()) {
       tr.Remove();
       cleared++;
     }
@@ -127,14 +118,14 @@ void exports::table_update::Run(uint32_t row_count) {
   size_t nt =
       fmt_fixed(touchedbuf, 0, update_ms * 1000.0 / static_cast<double>(updated),
                 3);
-  append_row(document, report, "update (primes)", std::string_view(msbuf, nm),
+  append_row(document, report, "update (selected)", std::string_view(msbuf, nm),
              std::string_view(perbuf, np), std::string_view(touchedbuf, nt));
 
   nm = fmt_fixed(msbuf, 0, clear_ms, 3);
   np = fmt_fixed(perbuf, 0, clear_ms * 1000.0 / rows_d, 3);
   nt = fmt_fixed(touchedbuf, 0, clear_ms * 1000.0 / static_cast<double>(cleared),
                  3);
-  append_row(document, report, "clear (non-primes)",
+  append_row(document, report, "clear (unselected)",
              std::string_view(msbuf, nm), std::string_view(perbuf, np),
              std::string_view(touchedbuf, nt));
 

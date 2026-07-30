@@ -9,15 +9,6 @@
 
 using emscripten::val;
 
-static bool is_prime(uint32_t n) {
-  for (uint32_t i = 2; i <= n / 2; i++) {
-    if (n % i == 0) {
-      return false;
-    }
-  }
-  return true;
-}
-
 static std::string fmt(double v, int decimals) {
   char buf[64];
   snprintf(buf, sizeof buf, "%.*f", decimals, v);
@@ -83,10 +74,10 @@ static void run(uint32_t row_count) {
   uint32_t updated = 0;
   for (uint32_t idx = 0; idx < rows.size(); idx++) {
     uint32_t i = idx + 1;
-    if (is_prime(i)) {
+    if (i % 8 == 0) {
       auto &[tr, td] = rows[idx];
-      td.set("textContent", val("row " + std::to_string(i) + " (prime)"));
-      tr.call<void>("setAttribute", val("data-prime"), val("data-prime"));
+      td.set("textContent", val("row " + std::to_string(i) + " (selected)"));
+      tr.call<void>("setAttribute", val("data-selected"), val("data-selected"));
       updated++;
     }
   }
@@ -96,7 +87,7 @@ static void run(uint32_t row_count) {
   perf.call<void>("mark", val("clear-start"));
   uint32_t cleared = 0;
   for (auto &[tr, td] : rows) {
-    if (tr.call<val>("getAttribute", val("data-prime")).isNull()) {
+    if (tr.call<val>("getAttribute", val("data-selected")).isNull()) {
       tr.call<void>("remove");
       cleared++;
     }
@@ -117,10 +108,10 @@ static void run(uint32_t row_count) {
   double rows_d = static_cast<double>(row_count);
   append_row(document, report, "create", fmt(create_ms, 3),
              fmt(create_ms * 1000.0 / rows_d, 3), "-");
-  append_row(document, report, "update (primes)", fmt(update_ms, 3),
+  append_row(document, report, "update (selected)", fmt(update_ms, 3),
              fmt(update_ms * 1000.0 / rows_d, 3),
              fmt(update_ms * 1000.0 / static_cast<double>(updated), 3));
-  append_row(document, report, "clear (non-primes)", fmt(clear_ms, 3),
+  append_row(document, report, "clear (unselected)", fmt(clear_ms, 3),
              fmt(clear_ms * 1000.0 / rows_d, 3),
              fmt(clear_ms * 1000.0 / static_cast<double>(cleared), 3));
 
