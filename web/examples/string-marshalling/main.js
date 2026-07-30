@@ -94,12 +94,46 @@ async function runAll(params) {
   runRawJs(params.ms);
   await new Promise(res => setTimeout(res, delay));
 
-  // rust
-  const { run } = await load({
+  // c++ (emscripten, embind)
+  const { default: createEmscripten } = await import("../../cpp/string-marshalling/emscripten/string_marshalling.mjs");
+  const emscripten = await createEmscripten();
+  emscripten.run(params.ms);
+  await new Promise(res => setTimeout(res, delay));
+
+  // c++ (emscripten, EM_JS)
+  const { default: createEmJs } = await import("../../cpp/string-marshalling/em-js/string_marshalling.mjs");
+  const emJs = await createEmJs();
+  emJs._run(params.ms);
+  await new Promise(res => setTimeout(res, delay));
+
+  // rust (wasm-bindgen)
+  const { default: initWasmBindgen, run: runWasmBindgen } = await import("../../rust/string-marshalling-wasm-bindgen/string_marshalling_wasm_bindgen.js");
+  await initWasmBindgen();
+  runWasmBindgen(params.ms);
+  await new Promise(res => setTimeout(res, delay));
+
+  // rust (component)
+  const { run: runRust } = await load({
     jco: () => import("../../rust/string-marshalling/jco/string_marshalling.js"),
     wasm: new URL("../../rust/string-marshalling/native/string_marshalling.wasm", import.meta.url),
   });
-  run(params.ms);
+  runRust(params.ms);
+  await new Promise(res => setTimeout(res, delay));
+
+  // c++ (component)
+  const { run: runCpp } = await load({
+    jco: () => import("../../cpp/string-marshalling/jco/string_marshalling.js"),
+    wasm: new URL("../../cpp/string-marshalling/native/string_marshalling.wasm", import.meta.url),
+  });
+  runCpp(params.ms);
+  await new Promise(res => setTimeout(res, delay));
+
+  // c (component)
+  const { run: runC } = await load({
+    jco: () => import("../../c/string-marshalling/jco/string_marshalling.js"),
+    wasm: new URL("../../c/string-marshalling/native/string_marshalling.wasm", import.meta.url),
+  });
+  runC(params.ms);
   await new Promise(res => setTimeout(res, delay));
 }
 

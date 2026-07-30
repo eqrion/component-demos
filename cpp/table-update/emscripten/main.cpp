@@ -50,7 +50,7 @@ static void run(uint32_t row_count) {
   perf.call<void>("mark", val("emscripten-start"));
 
   val heading = document.call<val>("createElement", val("h2"));
-  heading.set("textContent", val(std::string("Emscripten (C++)")));
+  heading.set("textContent", val(std::string("Emscripten (C++, embind)")));
   body.call<void>("appendChild", heading);
 
   val toggle = document.call<val>("createElement", val("details"));

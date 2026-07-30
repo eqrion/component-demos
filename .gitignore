@@ -6,7 +6,7 @@ web/*/*/jco/
 web/*/*/native/
 web/*/*/emscripten/
 web/*/*/em-js/
-web/rust/dom-traversal-wasm-bindgen/
+web/rust/*-wasm-bindgen/
 **/src/bindings.rs
 .DS_Store
 

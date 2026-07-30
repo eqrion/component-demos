@@ -105,13 +105,25 @@ async function runAll(params) {
   runRawJs(params.rows);
   await new Promise(res => setTimeout(res, delay));
 
-  // c++ (emscripten)
+  // c++ (emscripten, embind)
   const { default: createEmscripten } = await import("../../cpp/table-update/emscripten/table_update.mjs");
   const emscripten = await createEmscripten();
   emscripten.run(params.rows);
   await new Promise(res => setTimeout(res, delay));
 
-  // rust
+  // c++ (emscripten, EM_JS)
+  const { default: createEmJs } = await import("../../cpp/table-update/em-js/table_update.mjs");
+  const emJs = await createEmJs();
+  emJs._run(params.rows);
+  await new Promise(res => setTimeout(res, delay));
+
+  // rust (wasm-bindgen)
+  const { default: initWasmBindgen, run: runWasmBindgen } = await import("../../rust/table-update-wasm-bindgen/table_update_wasm_bindgen.js");
+  await initWasmBindgen();
+  runWasmBindgen(params.rows);
+  await new Promise(res => setTimeout(res, delay));
+
+  // rust (component)
   const { run: runRust } = await load({
     jco: () => import("../../rust/table-update/jco/table_update.js"),
     wasm: new URL("../../rust/table-update/native/table_update.wasm", import.meta.url),
