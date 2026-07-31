@@ -165,6 +165,8 @@ void exports_tu_run(uint32_t row_count) {
   mark(perf, "clear-end");
   double clear_ms = measure(perf, "clear", "clear-start", "clear-end");
 
+  tu_method_element_remove(tu_borrow_element(toggle));
+
   tu_own_element_t report = create_element(document, "table");
   tu_own_element_t header = create_element(document, "tr");
   const char *labels[] = {"phase", "total ms", "µs/row",

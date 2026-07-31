@@ -7,9 +7,18 @@
 typedef int DomHandleId;
 
 EM_JS(void, dom_init, (), {
-  Module.__domHandles = [undefined];
+  Module.__domHandles = [null, undefined];
   Module.__domFreeList = [];
+  Module.__domGet = function(index) {
+    return Module.__domHandles[index];
+  };
   Module.__domAlloc = function(value) {
+    if (value === null) {
+      return 0;
+    }
+    if (value === undefined) {
+      return 1;
+    }
     var id = Module.__domFreeList.pop();
     if (id === undefined) {
       id = Module.__domHandles.length;
@@ -22,6 +31,9 @@ EM_JS(void, dom_init, (), {
 });
 
 EM_JS(void, dom_release, (DomHandleId id), {
+  if (id <= 1) {
+    return;
+  }
   Module.__domHandles[id] = undefined;
   Module.__domFreeList.push(id);
 });
@@ -35,29 +47,34 @@ EM_JS(DomHandleId, dom_get_body_js, (), {
 });
 
 EM_JS(DomHandleId, dom_create_element_js, (DomHandleId document, const char *tag), {
-  return Module.__domAlloc(Module.__domHandles[document].createElement(UTF8ToString(tag)));
+  let tagString = !tag ? '' : UTF8ToString(tag);
+  return Module.__domAlloc(Module.__domGet(document).createElement(tagString));
 });
 
 EM_JS(void, dom_append_child_js, (DomHandleId parent, DomHandleId child), {
-  Module.__domHandles[parent].appendChild(Module.__domHandles[child]);
+  Module.__domGet(parent).appendChild(Module.__domGet(child));
 });
 
 EM_JS(DomHandleId, dom_first_child_js, (DomHandleId node), {
-  var fc = Module.__domHandles[node].firstChild;
-  return fc ? Module.__domAlloc(fc) : 0;
+  var fc = Module.__domGet(node).firstChild;
+  return Module.__domAlloc(fc);
 });
 
 EM_JS(DomHandleId, dom_next_sibling_js, (DomHandleId node), {
-  var ns = Module.__domHandles[node].nextSibling;
-  return ns ? Module.__domAlloc(ns) : 0;
+  var ns = Module.__domGet(node).nextSibling;
+  return Module.__domAlloc(ns);
 });
 
 EM_JS(void, dom_set_text_content_js, (DomHandleId node, const char *text), {
-  Module.__domHandles[node].textContent = UTF8ToString(text);
+  Module.__domGet(node).textContent = !text ? '' : UTF8ToString(text);
+});
+
+EM_JS(void, dom_remove_js, (DomHandleId node), {
+  Module.__domGet(node).remove();
 });
 
 EM_JS(void, dom_append_row_js, (DomHandleId document, DomHandleId table, const char *label, const char *value), {
-  var doc = Module.__domHandles[document];
+  var doc = Module.__domGet(document);
   var row = doc.createElement("tr");
   var th = doc.createElement("th");
   th.textContent = UTF8ToString(label);
@@ -65,7 +82,7 @@ EM_JS(void, dom_append_row_js, (DomHandleId document, DomHandleId table, const c
   var td = doc.createElement("td");
   td.textContent = UTF8ToString(value);
   row.appendChild(td);
-  Module.__domHandles[table].appendChild(row);
+  Module.__domGet(table).appendChild(row);
 });
 
 EM_JS(void, perf_mark, (const char *name), {
@@ -134,6 +151,10 @@ static void dom_set_text_content(const DomHandle &node, const char *text) {
   dom_set_text_content_js(node.id(), text);
 }
 
+static void dom_remove(const DomHandle &node) {
+  dom_remove_js(node.id());
+}
+
 static void dom_append_row(const DomHandle &document, const DomHandle &table,
                            const std::string &label, const std::string &value) {
   dom_append_row_js(document.id(), table.id(), label.c_str(), value.c_str());
@@ -179,6 +200,8 @@ extern "C" void EMSCRIPTEN_KEEPALIVE run(int depth, int num_children) {
   unsigned node_total = traverse(root);
   perf_mark("traverse-end");
   double traverse_ms = perf_measure("traverse", "traverse-start", "traverse-end");
+
+  dom_remove(root);
 
   double us_per_node = (traverse_ms * 1000.0) / static_cast<double>(node_total);
 

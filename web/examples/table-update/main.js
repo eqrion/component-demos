@@ -79,6 +79,8 @@ function runRawJs(rowCount) {
   performance.mark("clear-end");
   const clearMs = performance.measure("clear", "clear-start", "clear-end").duration;
 
+  toggle.remove();
+
   document.body.appendChild(buildReport([
     ["create", createMs.toFixed(3), ((createMs * 1_000) / rowCount).toFixed(3), "-"],
     ["update (selected)", updateMs.toFixed(3), ((updateMs * 1_000) / rowCount).toFixed(3), ((updateMs * 1_000) / updated).toFixed(3)],
@@ -90,7 +92,7 @@ function runRawJs(rowCount) {
 }
 
 async function runAll(params) {
-  const delay = 50;
+  const delay = 1000;
 
   // js
   runRawJs(params.rows);
@@ -148,20 +150,10 @@ function clear() {
   }
 }
 
-// A <details> with the live row table sits between the heading and the metrics
-// table, so walk forward to the first sibling table.
-function metricsTable(heading) {
-  let el = heading.nextElementSibling;
-  while (el && el.tagName !== "TABLE") {
-    el = el.nextElementSibling;
-  }
-  return el;
-}
-
 function getMeasurements() {
   const measurements = {};
   for (const heading of document.querySelectorAll("h2")) {
-    const table = metricsTable(heading);
+    const table = heading.nextSibling;
     const phases = getTableColumnValuesByName(table, "phase");
     const totalMs = getTableColumnValuesByName(table, "total ms");
     const usRow = getTableColumnValuesByName(table, "µs/row");

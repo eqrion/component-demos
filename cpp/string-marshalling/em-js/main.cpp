@@ -8,9 +8,18 @@
 typedef int DomHandleId;
 
 EM_JS(void, dom_init, (), {
-  Module.__domHandles = [undefined];
+  Module.__domHandles = [null, undefined];
   Module.__domFreeList = [];
+  Module.__domGet = function(index) {
+    return Module.__domHandles[index];
+  };
   Module.__domAlloc = function(value) {
+    if (value === null) {
+      return 0;
+    }
+    if (value === undefined) {
+      return 1;
+    }
     var id = Module.__domFreeList.pop();
     if (id === undefined) {
       id = Module.__domHandles.length;
@@ -23,6 +32,9 @@ EM_JS(void, dom_init, (), {
 });
 
 EM_JS(void, dom_release, (DomHandleId id), {
+  if (id <= 1) {
+    return;
+  }
   Module.__domHandles[id] = undefined;
   Module.__domFreeList.push(id);
 });
@@ -36,19 +48,21 @@ EM_JS(DomHandleId, dom_get_body_js, (), {
 });
 
 EM_JS(DomHandleId, dom_create_element_js, (DomHandleId document, const char *tag), {
-  return Module.__domAlloc(Module.__domHandles[document].createElement(UTF8ToString(tag)));
+  let tagString = !tag ? '' : UTF8ToString(tag);
+  return Module.__domAlloc(Module.__domGet(document).createElement(tagString));
 });
 
 EM_JS(void, dom_append_child_js, (DomHandleId parent, DomHandleId child), {
-  Module.__domHandles[parent].appendChild(Module.__domHandles[child]);
+  Module.__domGet(parent).appendChild(Module.__domGet(child));
 });
 
 EM_JS(void, dom_set_text_content_js, (DomHandleId node, const char *text), {
-  Module.__domHandles[node].textContent = UTF8ToString(text);
+  let textString = !text ? '' : UTF8ToString(text);
+  Module.__domGet(node).textContent = textString;
 });
 
 EM_JS(int, dom_get_text_content_js, (DomHandleId node, char *buf, int buf_size), {
-  var s = Module.__domHandles[node].textContent;
+  var s = Module.__domGet(node).textContent;
   stringToUTF8(s, buf, buf_size);
   return lengthBytesUTF8(s);
 });
@@ -57,14 +71,14 @@ EM_JS(void, dom_append_row_js, (DomHandleId document, DomHandleId table,
                                 const char *c0, const char *c1,
                                 const char *c2, const char *c3,
                                 const char *c4), {
-  var doc = Module.__domHandles[document];
+  var doc = Module.__domGet(document);
   var row = doc.createElement("tr");
   [c0, c1, c2, c3, c4].forEach(function(ptr) {
     var td = doc.createElement("td");
     td.textContent = UTF8ToString(ptr);
     row.appendChild(td);
   });
-  Module.__domHandles[table].appendChild(row);
+  Module.__domGet(table).appendChild(row);
 });
 
 EM_JS(void, perf_mark, (const char *name), {

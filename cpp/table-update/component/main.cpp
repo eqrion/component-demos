@@ -95,6 +95,8 @@ void exports::table_update::Run(uint32_t row_count) {
   double clear_ms =
       perf.Measure("clear", "clear-start", "clear-end").GetDuration();
 
+  toggle.Remove();
+
   dom::Element report = document.CreateElement("table");
   dom::Element header = document.CreateElement("tr");
   for (std::string_view label :

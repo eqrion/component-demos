@@ -133,6 +133,8 @@ impl Guest for Component {
             .measure("clear", "clear-start", "clear-end")
             .get_duration();
 
+        toggle.remove();
+
         let report = document.create_element("table");
         let header = document.create_element("tr");
         for label in ["phase", "total ms", "µs/row", "µs/row touched (est.)"] {

@@ -65,6 +65,8 @@ static void run(int depth, int num_children) {
   perf.call<void>("mark", val("traverse-end"));
   double traverse_ms = measure(perf, "traverse", "traverse-start", "traverse-end");
 
+  root.call<void>("remove");
+
   double us_per_node = (traverse_ms * 1000.0) / static_cast<double>(node_total);
 
   val heading = document.call<val>("createElement", val("h2"));

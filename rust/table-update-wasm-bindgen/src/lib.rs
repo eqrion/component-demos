@@ -89,6 +89,8 @@ pub fn run(row_count: u32) {
         .unwrap()
         .duration();
 
+    toggle.remove();
+
     let report = document.create_element("table").unwrap();
     let header = document.create_element("tr").unwrap();
     for label in ["phase", "total ms", "µs/row", "µs/row touched (est.)"] {

@@ -88,7 +88,7 @@ function runRawJs(minMs) {
 }
 
 async function runAll(params) {
-  const delay = 50;
+  const delay = 1000;
 
   // js
   runRawJs(params.ms);

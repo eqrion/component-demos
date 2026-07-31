@@ -95,6 +95,8 @@ static void run(uint32_t row_count) {
   perf.call<void>("mark", val("clear-end"));
   double clear_ms = measure(perf, "clear", "clear-start", "clear-end");
 
+  toggle.call<void>("remove");
+
   val report = document.call<val>("createElement", val("table"));
   val header = document.call<val>("createElement", val("tr"));
   for (const char *label :

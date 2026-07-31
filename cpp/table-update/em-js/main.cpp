@@ -9,9 +9,18 @@
 typedef int DomHandleId;
 
 EM_JS(void, dom_init, (), {
-  Module.__domHandles = [undefined];
+  Module.__domHandles = [null, undefined];
   Module.__domFreeList = [];
+  Module.__domGet = function(index) {
+    return Module.__domHandles[index];
+  };
   Module.__domAlloc = function(value) {
+    if (value === null) {
+      return 0;
+    }
+    if (value === undefined) {
+      return 1;
+    }
     var id = Module.__domFreeList.pop();
     if (id === undefined) {
       id = Module.__domHandles.length;
@@ -24,6 +33,9 @@ EM_JS(void, dom_init, (), {
 });
 
 EM_JS(void, dom_release, (DomHandleId id), {
+  if (id <= 1) {
+    return;
+  }
   Module.__domHandles[id] = undefined;
   Module.__domFreeList.push(id);
 });
@@ -37,40 +49,45 @@ EM_JS(DomHandleId, dom_get_body_js, (), {
 });
 
 EM_JS(DomHandleId, dom_create_element_js, (DomHandleId document, const char *tag), {
-  return Module.__domAlloc(Module.__domHandles[document].createElement(UTF8ToString(tag)));
+  let tagString = !tag ? '' : UTF8ToString(tag);
+  return Module.__domAlloc(Module.__domGet(document).createElement(tagString));
 });
 
 EM_JS(void, dom_append_child_js, (DomHandleId parent, DomHandleId child), {
-  Module.__domHandles[parent].appendChild(Module.__domHandles[child]);
+  Module.__domGet(parent).appendChild(Module.__domGet(child));
 });
 
 EM_JS(void, dom_set_text_content_js, (DomHandleId node, const char *text), {
-  Module.__domHandles[node].textContent = UTF8ToString(text);
+  let textString = !text ? '' : UTF8ToString(text);
+  Module.__domGet(node).textContent = textString;
 });
 
 EM_JS(void, dom_set_attribute_js, (DomHandleId node, const char *name, const char *value), {
-  Module.__domHandles[node].setAttribute(UTF8ToString(name), UTF8ToString(value));
+  let nameString = !name ? '' : UTF8ToString(name);
+  let valueString = !value ? '' : UTF8ToString(value);
+  Module.__domGet(node).setAttribute(nameString, valueString);
 });
 
 EM_JS(int, dom_has_attribute_js, (DomHandleId node, const char *name), {
-  return Module.__domHandles[node].hasAttribute(UTF8ToString(name)) ? 1 : 0;
+  let nameString = !name ? '' : UTF8ToString(name);
+  return Module.__domGet(node).hasAttribute(nameString) ? 1 : 0;
 });
 
 EM_JS(void, dom_remove_js, (DomHandleId node), {
-  Module.__domHandles[node].remove();
+  Module.__domGet(node).remove();
 });
 
 EM_JS(void, dom_append_row_js, (DomHandleId document, DomHandleId table,
                                 const char *c0, const char *c1,
                                 const char *c2, const char *c3), {
-  var doc = Module.__domHandles[document];
+  var doc = Module.__domGet(document);
   var row = doc.createElement("tr");
   [c0, c1, c2, c3].forEach(function(ptr) {
     var td = doc.createElement("td");
     td.textContent = UTF8ToString(ptr);
     row.appendChild(td);
   });
-  Module.__domHandles[table].appendChild(row);
+  Module.__domGet(table).appendChild(row);
 });
 
 EM_JS(void, perf_mark, (const char *name), {
@@ -216,6 +233,8 @@ extern "C" void EMSCRIPTEN_KEEPALIVE run(uint32_t row_count) {
   }
   perf_mark("clear-end");
   double clear_ms = perf_measure("clear", "clear-start", "clear-end");
+
+  dom_remove(toggle);
 
   DomHandle report = dom_create_element(document, "table");
   DomHandle header = dom_create_element(document, "tr");

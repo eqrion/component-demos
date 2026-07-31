@@ -52,12 +52,14 @@ pub fn run(depth: i32, num_children: i32) {
         .duration();
 
     perf.mark("traverse-start").unwrap();
-    let node_total = traverse(Some(root.into())) as u64;
+    let node_total = traverse(Some(root.clone().into())) as u64;
     perf.mark("traverse-end").unwrap();
     let traverse_ms = perf
         .measure_with_str_and_end_mark("traverse", "traverse-start", "traverse-end")
         .unwrap()
         .duration();
+
+    root.remove();
 
     let us_per_node = (traverse_ms * 1_000.0) / node_total as f64;
 

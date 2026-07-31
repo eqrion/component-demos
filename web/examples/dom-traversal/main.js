@@ -66,7 +66,7 @@ function runRawJs(depth, numChildren) {
 }
 
 async function runAll(params) {
-  const delay = 50;
+  const delay = 1000;
 
   // js
   runRawJs(params.depth, params.numChildren);

@@ -274,6 +274,14 @@ export async function init(
     await benchmark();
     benchmarkButton.disabled = false;
   });
+
+  if (new URLSearchParams(window.location.search).has("autobench")) {
+    benchmarkButton.disabled = true;
+    await benchmark();
+    benchmarkButton.disabled = false;
+    document.title = "AUTOBENCH_DONE";
+    fetch("http://localhost:8765/done").catch(() => {});
+  }
 }
 
 // Get a duration from a string as seconds
