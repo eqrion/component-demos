@@ -1,0 +1,37 @@
+// world root:component/root
+
+export class Document {
+  /**
+  * This type does not have a public constructor.
+  */
+  private constructor();
+}
+
+export class DomTokenList {
+  /**
+  * This type does not have a public constructor.
+  */
+  private constructor();
+}
+
+export class Element {
+  /**
+  * This type does not have a public constructor.
+  */
+  private constructor();
+}
+
+export class HtmlElement {
+  /**
+  * This type does not have a public constructor.
+  */
+  private constructor();
+}
+
+export class Window {
+  /**
+  * This type does not have a public constructor.
+  */
+  private constructor();
+}
+export function run(): void;

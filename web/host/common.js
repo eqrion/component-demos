@@ -21,7 +21,7 @@ function initUI() {
   const nav = document.querySelector("#nav");
 
   const backLink = document.createElement("a");
-  backLink.href = "/index.html";
+  backLink.href = "../../index.html";
   backLink.textContent = "← Back to index";
 
   // Add jco/native toggle

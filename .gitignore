@@ -2,11 +2,6 @@ target/
 node_modules/
 *.wat
 web/dist/
-web/*/*/jco/
-web/*/*/native/
-web/*/*/emscripten/
-web/*/*/em-js/
-web/rust/*-wasm-bindgen/
 **/src/bindings.rs
 .DS_Store
 
